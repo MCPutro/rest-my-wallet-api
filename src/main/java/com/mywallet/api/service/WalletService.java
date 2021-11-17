@@ -11,7 +11,7 @@ import com.mywallet.api.entity.Wallet;
 import com.mywallet.api.repository.UserRepository;
 import com.mywallet.api.repository.WalletRepository;
 import com.mywallet.api.response.Resp;
-import com.mywallet.api.response.UserResponse;
+
 
 @Service
 public class WalletService {
@@ -50,7 +50,6 @@ public class WalletService {
 	
 	@Transactional
 	public Resp removeWallet(String walletId) {
-		Resp resp;
 		try {
 			/**check if wallet id is exists**/
 			

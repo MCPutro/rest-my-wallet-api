@@ -27,6 +27,6 @@ spring:
 limitActivity: 10
 
 jwt-key:
-  secret:  ${jwt-key-secret} #mcputro #
-  expirationMs: ${jwt-key-expirationMs} #1800000 #30menit #300000 #5menit  #
-  refreshExp : ${jwt-key-refreshExp} #600000 #10menit #604800000 #7hari #
+  secret:  ${jwt-key-secret} #
+  expirationMs: ${jwt-key-expirationMs}
+  refreshExp : ${jwt-key-refreshExp}

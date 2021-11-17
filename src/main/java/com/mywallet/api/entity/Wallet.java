@@ -1,7 +1,6 @@
 package com.mywallet.api.entity;
 
 import java.io.Serializable;
-import java.util.ArrayList;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
