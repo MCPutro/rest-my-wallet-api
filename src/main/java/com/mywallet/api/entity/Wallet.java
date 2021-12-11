@@ -61,5 +61,15 @@ public class Wallet implements Serializable{
 		//this.mutasi = new ArrayList<>();
 		this.type = type;
 	}
+	
+	public Wallet(String id, String backgroundColor, String name, Double nominal, String textColor, String type) {
+		this.id = id;
+		this.backgroundColor = backgroundColor;
+		this.name = name;
+		this.nominal = nominal;
+		this.textColor = textColor;
+		//this.mutasi = new ArrayList<>();
+		this.type = type;
+	}
 
 }
