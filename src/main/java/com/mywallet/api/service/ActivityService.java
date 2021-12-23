@@ -1,5 +1,6 @@
 package com.mywallet.api.service;
 
+import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Optional;
@@ -22,6 +23,7 @@ import com.mywallet.api.model.Activity;
 import com.mywallet.api.model.ActivityList;
 import com.mywallet.api.repository.WalletRepository;
 import com.mywallet.api.response.ActivityUpdateResponse;
+import com.mywallet.api.response.Data;
 import com.mywallet.api.response.Resp;
 
 @Service
@@ -49,7 +51,10 @@ public class ActivityService {
 	public Resp createNewActivity(Activity newActivity, String UID) {
 		try {
 			//System.out.println("start : " + LocalDateTime.now());
-			newActivity.setId(UUID.randomUUID().toString());
+			
+			if (newActivity.getId() == null) {
+				newActivity.setId(UUID.randomUUID().toString());
+			}
 			Resp resp;
 			Optional<Wallet> existingWallet = this.walletRepository.findById(newActivity.getWalletId());
 			if (existingWallet.isPresent()) {
@@ -88,6 +93,9 @@ public class ActivityService {
 					/** return resp **/
 					if (err == null) {
 						resp = new Resp("success", null);
+						resp.setData(new Data() {
+							public String ActivityId = newActivity.getId();
+						});
 					} else {
 						resp = new Resp("error", err);
 					}
