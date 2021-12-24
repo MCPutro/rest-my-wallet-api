@@ -103,7 +103,9 @@ public class ActivityService {
 					if (err == null) {
 						resp = new Resp("success", null);
 						resp.setData(new Data() {
-							public String ActivityId = newActivity.getId();
+							public String activityId = newActivity.getId();
+							public String walletId = existingWallet.get().getId();
+							public Double remainingBalance = balance;
 						});
 					} else {
 						resp = new Resp("error", err);
