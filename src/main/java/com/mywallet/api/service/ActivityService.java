@@ -1,8 +1,11 @@
 package com.mywallet.api.service;
 
 import java.io.Serializable;
+import java.time.Instant;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -85,9 +88,15 @@ public class ActivityService {
 
 					/** update balance to db **/
 					walletRepository.save(existingWallet.get());
-
+					
+					Calendar c = Calendar.getInstance();
+					
+					c.setTime(newActivity.getDateActivity());
+					
+					String month = c.get(Calendar.MONTH)+1+"";
+					
 					String err = this.fireBaseService.insertActivity(UID,
-							LocalDateTime.now().getYear() + "-" + LocalDateTime.now().getMonthValue(),
+							c.get(Calendar.YEAR) + "-" + ((month.length() == 1) ? ("0"+month) : month),
 							newActivity);
 
 					/** return resp **/
