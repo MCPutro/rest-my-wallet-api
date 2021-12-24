@@ -189,7 +189,10 @@ public class ActivityService {
 				//System.out.println("nominal : " + writeResult.get().get().getDouble("nominalActivity"));
 				writeResult.delete();
 				
-				return new Resp("success", null);
+				return new Resp("success", null, new Data() {
+					public String walletid = existingWallet.getId();
+					public Double remainingBalance = existingWallet.getNominal();
+				});
 			}else {
 				return new Resp("error", "data not found.");
 			}
