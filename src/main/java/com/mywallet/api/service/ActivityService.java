@@ -182,7 +182,12 @@ public class ActivityService {
 				/**update nominal wallet**/
 				Wallet existingWallet = this.walletRepository.findById(writeResult.get().get().getString("walletId")).orElse(null);
 				if (existingWallet != null) {
-					existingWallet.setNominal(existingWallet.getNominal() + writeResult.get().get().getDouble("nominalActivity"));
+					if (writeResult.get().get().getBoolean("income")) {
+						existingWallet.setNominal(existingWallet.getNominal() - writeResult.get().get().getDouble("nominalActivity"));
+					}else {
+						existingWallet.setNominal(existingWallet.getNominal() + writeResult.get().get().getDouble("nominalActivity"));
+					}
+					
 					this.walletRepository.save(existingWallet);		
 				}
 				
@@ -192,6 +197,7 @@ public class ActivityService {
 				return new Resp("success", null, new Data() {
 					public String walletid = existingWallet.getId();
 					public Double remainingBalance = existingWallet.getNominal();
+					
 				});
 			}else {
 				return new Resp("error", "data not found.");
