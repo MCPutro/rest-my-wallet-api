@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.mywallet.api.entity.Wallet;
 import com.mywallet.api.response.Resp;
 import com.mywallet.api.service.WalletService;
+import com.mywallet.api.model.transfer;
 
 @RestController
 @RequestMapping("/api/wallet")
@@ -34,5 +35,10 @@ public class WalletController {
 	@DeleteMapping("/")
 	public Resp removeWallet(@RequestHeader String walletId) {
 		return this.walletService.removeWallet(walletId);
+	}
+	
+	@PostMapping("/transfer")
+	public Resp transfer(@RequestBody transfer trf) {
+		return this.walletService.transferInternal(trf);
 	}
 }
