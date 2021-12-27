@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.google.cloud.firestore.DocumentReference;
 import com.mywallet.api.entity.User;
 import com.mywallet.api.entity.Wallet;
 import com.mywallet.api.model.Activity;
@@ -109,6 +110,34 @@ public class WalletService {
 					a);
 			
 			return new Resp("success", null, new transferResp(trf.getId(), w1.getId(), w1.getNominal(), w2.getId(), w2.getNominal(), a));
+		} catch (Exception e) {
+			return new Resp("error", null);
+		}
+	}
+	
+	@Transactional
+	public Resp cancelTransferInternal(transfer trf, String UID, String period) {
+		try {
+			Wallet w1 = this.walletRepository.findById(trf.getWalletIdSource()).orElse(null);
+			
+			Wallet w2 = this.walletRepository.findById(trf.getWalletIdDestination()).orElse(null);
+			
+			w1.setNominal(w1.getNominal() + (trf.getNominal() + trf.getFee()) );
+			
+			w2.setNominal(w2.getNominal() - trf.getNominal());
+			
+			this.walletRepository.save(w1);
+			
+			this.walletRepository.save(w2);
+			
+			//remove record for transfer activity
+			this.fireBaseService.getActivityCollectionReference(UID, period)//db.collection(uid).document(DocumentLabel.activity).collection(period)
+					.document(trf.getId())
+					.delete()
+					;
+			
+			
+			return new Resp("success", null, new transferResp(trf.getId(), w1.getId(), w1.getNominal(), w2.getId(), w2.getNominal(), null));
 		} catch (Exception e) {
 			return new Resp("error", null);
 		}

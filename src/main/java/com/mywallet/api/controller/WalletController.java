@@ -41,4 +41,9 @@ public class WalletController {
 	public Resp transfer(@RequestBody transfer trf, @RequestHeader String UID) {
 		return this.walletService.transferInternal(trf, UID);
 	}
+	
+	@PostMapping("/cancelTransfer")
+	public Resp cancelTransfer(@RequestBody transfer trf, @RequestHeader String UID, @RequestHeader String period) {
+		return this.walletService.cancelTransferInternal(trf, UID, period);
+	}
 }
