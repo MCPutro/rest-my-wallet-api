@@ -1,5 +1,7 @@
 package com.mywallet.api.response;
 
+import com.mywallet.api.model.Activity;
+
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
@@ -13,4 +15,6 @@ public class transferResp implements Data{
 	private Double nominalSource;
 	private String walletIdDestination;
 	private Double nominalDestination;
+	private Activity newActivity;
+	
 }

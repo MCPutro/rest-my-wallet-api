@@ -38,7 +38,7 @@ public class WalletController {
 	}
 	
 	@PostMapping("/transfer")
-	public Resp transfer(@RequestBody transfer trf) {
-		return this.walletService.transferInternal(trf);
+	public Resp transfer(@RequestBody transfer trf, @RequestHeader String UID) {
+		return this.walletService.transferInternal(trf, UID);
 	}
 }

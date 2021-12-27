@@ -1,6 +1,9 @@
 package com.mywallet.api.service;
 
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
+import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -8,6 +11,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.mywallet.api.entity.User;
 import com.mywallet.api.entity.Wallet;
+import com.mywallet.api.model.Activity;
 import com.mywallet.api.model.transfer;
 import com.mywallet.api.repository.UserRepository;
 import com.mywallet.api.repository.WalletRepository;
@@ -22,6 +26,8 @@ public class WalletService {
 	@Autowired private WalletRepository walletRepository;
 	
 	@Autowired private UserRepository userRepository;
+	
+	@Autowired private FireBaseService fireBaseService;
 	
 	@Transactional
 	public Resp addWallet(Wallet w, String uid) {
@@ -66,7 +72,7 @@ public class WalletService {
 	}
 	
 	@Transactional
-	public Resp transferInternal(transfer trf) {
+	public Resp transferInternal(transfer trf, String UID) {
 		try {
 			Wallet w1 = this.walletRepository.findById(trf.getWalletIdSource()).orElse(null);
 			
@@ -80,7 +86,29 @@ public class WalletService {
 			
 			this.walletRepository.save(w2);
 			
-			return new Resp("success", null, new transferResp(trf.getId(), w1.getId(), w1.getNominal(), w2.getId(), w2.getNominal()));
+			//create record for transfer activity
+			Calendar c = Calendar.getInstance();
+			
+			c.setTime(new Date());
+			
+			String month = c.get(Calendar.MONTH)+1+"";
+			
+			Activity a = new Activity(
+					trf.getId(),
+					w1.getId()+"##"+w2.getId(),
+					w1.getName()+" -> "+w2.getName(),
+					"Transfer",
+					trf.getNominal(),
+					"To: "+w2.getId()+", Fee: "+trf.getFee(),
+					new Date(),
+					false
+					);
+			
+			String err = this.fireBaseService.insertActivity(UID, 
+					c.get(Calendar.YEAR) + "-" + ((month.length() == 1) ? ("0"+month) : month), 
+					a);
+			
+			return new Resp("success", null, new transferResp(trf.getId(), w1.getId(), w1.getNominal(), w2.getId(), w2.getNominal(), a));
 		} catch (Exception e) {
 			return new Resp("error", null);
 		}
