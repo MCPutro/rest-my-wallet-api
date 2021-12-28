@@ -34,8 +34,10 @@ public class UserDetailImp implements UserDetails {
 	private String uid;
 	
 	private String displayName;
+	
+	private String urlAvatar;
 
-	public UserDetailImp(String password, String username, String uid, String displayName) {
-		this(password, username, null, true, true, true, true, uid, displayName);
+	public UserDetailImp(String password, String username, String uid, String displayName, String urlAvatar) {
+		this(password, username, null, true, true, true, true, uid, displayName, urlAvatar);
 	}
 }

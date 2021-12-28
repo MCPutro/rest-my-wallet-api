@@ -1,17 +1,17 @@
 package com.mywallet.api.service;
 
-import java.time.Instant;
 import java.time.LocalDateTime;
-import java.util.UUID;
+//import java.time.Instant;
+//import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.mywallet.api.entity.RefreshToken;
+//import com.mywallet.api.entity.RefreshToken;
 import com.mywallet.api.entity.User;
-import com.mywallet.api.repository.RefreshTokenRepository;
+//import com.mywallet.api.repository.RefreshTokenRepository;
 import com.mywallet.api.repository.UserRepository;
 import com.mywallet.api.response.Resp;
 import com.mywallet.api.response.UserResponse;
@@ -38,15 +38,16 @@ public class UserService {
 				if (r.getStatus().equalsIgnoreCase("success")) {
 					user.setUid(((UserResponse) r.getData()).getUid());
 					user.setPassword(encoder.encode(user.getPassword()));
+					user.setUrlAvatar(((UserResponse) r.getData()).getUrlAvatar());
 					User result = this.userRepository.save(user);
 					
-					resp = new Resp("success", null, new UserResponse(result.getUid(), result.getUsername(), result.getEmail()));	
+					resp = new Resp("success", null, new UserResponse(result.getUid(), result.getUsername(), result.getEmail(), result.getUrlAvatar() ));	
 				}else {
 					resp = new Resp("error", r.getMessage());	
 				}
 
 			}else {
-				resp = new Resp("error", "Email already registered", new UserResponse(null, existing.getUsername(), existing.getEmail()));	
+				resp = new Resp("error", "Email already registered", new UserResponse(null, existing.getUsername(), existing.getEmail(), null));	
 			}
 			
 			return resp;
@@ -78,6 +79,33 @@ public class UserService {
 			return null;
 		}
 	}	
+	
+	@Transactional
+	public Resp updateUserData(User newUser) {
+		try {
+			
+			String result = this.firebaseService.update(newUser);
+			
+			if (result != null) {
+				return new Resp("error", result);
+			}
+			
+			User existing = this.userRepository.findByUid(newUser.getUid());
+			
+			//System.out.println("?? "+existing);
+			
+			existing.setUsername(newUser.getUsername());
+			existing.setEmail(newUser.getEmail());
+			existing.setPassword(encoder.encode(newUser.getPassword()));
+			
+			this.userRepository.save(existing);
+			
+			return new Resp("ok", null);
+		} catch (Exception e) {
+			return new Resp("error", e.getMessage());
+		}
+	}
+	
 	
 	
 }

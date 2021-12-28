@@ -53,6 +53,9 @@ public class User implements Serializable {
 
 	@Column(name = "registrationDate")
 	private LocalDateTime registrationDate;
+	
+	@Column(name = "urlAvatar")
+	private String urlAvatar;
 
 	@Column(name = "deviceId")
 	private String deviceId;
@@ -60,18 +63,18 @@ public class User implements Serializable {
 	@OneToMany(targetEntity = Wallet.class, cascade = CascadeType.ALL)
 	@JoinColumn(name = "user_id")
 	private List<Wallet> wallets;
-
 	
 	@OneToOne(mappedBy = "user", cascade = CascadeType.ALL)
 	@PrimaryKeyJoinColumn
 	private RefreshToken refreshToken;
 
-	public User(String email, String password, String username, String uid) {
+	public User(String email, String password, String username, String uid, String urlAvatar) {
 		super();
 		this.email = email;
 		this.password = password;
 		this.username = username;
 		this.uid = uid;
+		this.urlAvatar = urlAvatar;
 	}
 
 }

@@ -17,5 +17,7 @@ public class UserResponse implements Data{
 	
 	private String email;
 	
+	private String urlAvatar;
+	
 	
 }

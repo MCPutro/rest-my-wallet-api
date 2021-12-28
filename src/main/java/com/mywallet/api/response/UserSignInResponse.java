@@ -19,5 +19,6 @@ public class UserSignInResponse implements Data{
 	
 	private String refreshToken;
 	
+	private String urlAvatar;
 	
 }

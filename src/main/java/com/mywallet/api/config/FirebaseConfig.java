@@ -21,6 +21,8 @@ import com.google.firebase.FirebaseOptions;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.cloud.FirestoreClient;
 
+import java.util.Random;
+
 @Configuration
 public class FirebaseConfig {
 
@@ -35,6 +37,11 @@ public class FirebaseConfig {
 	@Bean
 	public Firestore firestore() {
 		return FirestoreClient.getFirestore();
+	}
+	
+	@Bean
+	public Random random() {
+		return new Random();
 	}
 
 	@PostConstruct

@@ -26,6 +26,7 @@ import com.mywallet.api.entity.User;
 import com.mywallet.api.model.UserDetailImp;
 import com.mywallet.api.repository.RefreshTokenRepository;
 import com.mywallet.api.response.Resp;
+import com.mywallet.api.response.UserResponse;
 import com.mywallet.api.response.UserSignInResponse;
 import com.mywallet.api.service.RefreshTokenService;
 import com.mywallet.api.service.UserService;
@@ -53,6 +54,8 @@ public class UserController {
 	@Autowired
 	private RefreshTokenService refreshTokenService;
 
+	
+	
 	/****/
 	@GetMapping("/")
 	public String onAir() {
@@ -106,7 +109,8 @@ public class UserController {
 							userDetails.getDisplayName(), 
 							"Bearer", 
 							token, 
-							this.refreshTokenService.generateRefresToken(user)
+							this.refreshTokenService.generateRefresToken(user),
+							userDetails.getUrlAvatar()
 							)
 					);
 		} catch (Exception e) {
@@ -171,6 +175,12 @@ public class UserController {
 		} catch (BadCredentialsException e) {
 			throw new Exception("INVALID_CREDENTIALS", e);
 		}
+	}
+	
+	@PostMapping(value = "/update", produces = "application/json")
+	public Resp updateUserData(@RequestBody User user) {
+		
+		return this.userService.updateUserData(user);
 	}
 
 }

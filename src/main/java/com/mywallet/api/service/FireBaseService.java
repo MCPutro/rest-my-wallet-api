@@ -10,6 +10,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
@@ -35,6 +36,7 @@ import com.google.firebase.FirebaseApp;
 import com.google.firebase.FirebaseOptions;
 import com.google.firebase.auth.*;
 import com.google.firebase.auth.UserRecord.CreateRequest;
+import com.google.firebase.auth.UserRecord.UpdateRequest;
 import com.google.firebase.cloud.FirestoreClient;
 import com.mywallet.api.config.DocumentLabel;
 import com.mywallet.api.entity.User;
@@ -51,28 +53,44 @@ public class FireBaseService {
 	
 	@Autowired
 	private Firestore db;
+	
+	@Autowired
+	private Random r;
+	
+	private String[] url_image = {
+			"https://firebasestorage.googleapis.com/v0/b/my-wallet-api-93eaa.appspot.com/o/default%2Favatar(1).png?alt=media&token=153551e6-5ce5-4632-a4bf-3d2a0d964658",
+			"https://firebasestorage.googleapis.com/v0/b/my-wallet-api-93eaa.appspot.com/o/default%2Favatar(2).png?alt=media&token=9df29c80-14ca-4b91-b105-5270a5ea1b30",
+			"https://firebasestorage.googleapis.com/v0/b/my-wallet-api-93eaa.appspot.com/o/default%2Favatar(3).png?alt=media&token=0f20be54-5af2-4cd0-947d-5f31de405eed",
+			"https://firebasestorage.googleapis.com/v0/b/my-wallet-api-93eaa.appspot.com/o/default%2Favatar(4).png?alt=media&token=1a646b90-cf9d-4eb6-af2e-df926346910a",
+			"https://firebasestorage.googleapis.com/v0/b/my-wallet-api-93eaa.appspot.com/o/default%2Favatar(5).png?alt=media&token=34880bf5-3057-4c54-8c9a-94713aea002a",
+			"https://firebasestorage.googleapis.com/v0/b/my-wallet-api-93eaa.appspot.com/o/default%2Favatar(6).png?alt=media&token=ca158247-2925-4628-bb56-4a2a6372f912"
+	};
 
 	@Transactional
 	public Resp createUser(User baru) {
 		Resp resp;
 		try {
+			
 			System.out.println("Start created new user: ");
-			CreateRequest request = new CreateRequest().setEmail(baru.getEmail()).setEmailVerified(false)
+			CreateRequest request = new CreateRequest()
+					.setEmail(baru.getEmail())
+					.setEmailVerified(false)
 					.setPassword(baru.getPassword())
 					// .setPhoneNumber(null)
 					.setDisplayName(baru.getUsername())
-					// .setPhotoUrl("http://www.example.com/12345678/photo.png")
+					.setPhotoUrl(url_image[r.nextInt(url_image.length)])
 					.setDisabled(false);
 			//System.out.println("Start created new user: ");
 			
 			UserRecord userRecord = this.firebaseAuth.createUser(request);
-			System.out.println("Successfully created new user: " + userRecord.getUid());
+			//System.out.println("Successfully created new user: " + userRecord.getUid());
+			
 			
 			resp = new Resp("success", null);
-			resp.setData(new UserResponse(userRecord.getUid(), userRecord.getDisplayName(), userRecord.getEmail()));
+			resp.setData(new UserResponse(userRecord.getUid(), userRecord.getDisplayName(), userRecord.getEmail(), userRecord.getPhotoUrl()));
 			return resp;
 		} catch (Exception e) {
-			System.out.println("error : " + e.getMessage());
+			System.out.println("createUser|error|" + e.getMessage());
 			resp = new Resp("Error", e.getMessage());
 			return resp;
 		}
@@ -98,7 +116,28 @@ public class FireBaseService {
 	@Transactional
 	public CollectionReference getActivityCollectionReference(String UID, String period) {
 		return  db.collection(UID).document(DocumentLabel.activity).collection(period);
+	}
 	
+	@Transactional
+	public String update(User newUser) {
+		try {
+			UpdateRequest request = new UpdateRequest(newUser.getUid())
+				    .setEmail(newUser.getEmail())
+				    //.setPhoneNumber("+11234567890")
+				    //.setEmailVerified(false)
+				    .setPassword(newUser.getPassword())
+				    .setDisplayName(newUser.getUsername())
+				    .setPhotoUrl(url_image[r.nextInt(url_image.length)])
+				    //.setDisabled(true)
+				    ;
+
+			UserRecord userRecord = FirebaseAuth.getInstance().updateUser(request);
+			
+			return null;
+
+		} catch (Exception e) {
+			return e.getMessage();
+		}
 	}
 	
 }
