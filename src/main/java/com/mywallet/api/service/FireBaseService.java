@@ -127,7 +127,7 @@ public class FireBaseService {
 				    //.setEmailVerified(false)
 				    .setPassword(newUser.getPassword())
 				    .setDisplayName(newUser.getUsername())
-				    .setPhotoUrl(url_image[r.nextInt(url_image.length)])
+				    .setPhotoUrl(newUser.getUrlAvatar())
 				    //.setDisabled(true)
 				    ;
 

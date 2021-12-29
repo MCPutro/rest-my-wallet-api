@@ -87,7 +87,7 @@ public class UserService {
 			String result = this.firebaseService.update(newUser);
 			
 			if (result != null) {
-				return new Resp("error", result);
+				return new Resp("error1", result);
 			}
 			
 			User existing = this.userRepository.findByUid(newUser.getUid());
@@ -97,10 +97,11 @@ public class UserService {
 			existing.setUsername(newUser.getUsername());
 			existing.setEmail(newUser.getEmail());
 			existing.setPassword(encoder.encode(newUser.getPassword()));
+			existing.setUrlAvatar(newUser.getUrlAvatar());
 			
 			this.userRepository.save(existing);
 			
-			return new Resp("ok", null);
+			return new Resp("success", null);
 		} catch (Exception e) {
 			return new Resp("error", e.getMessage());
 		}
