@@ -76,7 +76,8 @@ public class WebSecurityConfig  extends WebSecurityConfigurerAdapter{
 						"/api/user/createAndLogin",
 						"/api/user/signup",
 						"/api/user/signin",
-						"/api/user/refresh-token"
+						"/api/user/refresh-token",
+						"/api/user/"
 						).permitAll()
 				// all other requests need to be authenticated
 				.anyRequest().authenticated().and()
