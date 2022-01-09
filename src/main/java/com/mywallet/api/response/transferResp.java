@@ -8,13 +8,30 @@ import lombok.Setter;
 
 @Setter
 @Getter
-@AllArgsConstructor
 public class transferResp implements Data{
 	private String id;
-	private String walletIdSource;
-	private Double nominalSource;
-	private String walletIdDestination;
-	private Double nominalDestination;
+	private newWalletData newWalletData;
 	private Activity newActivity;
+
+	public transferResp(String id, String walletIdSource, Double nominalSource, String walletIdDestination, Double nominalDestination, Activity newActivity) {
+		this.id = id;
+		this.newWalletData = new newWalletData(walletIdSource, nominalSource, walletIdDestination, nominalDestination);
+		this.newActivity = newActivity;
+	}
+
+	@Getter
+	private class newWalletData{
+		String walletIdSource;
+		Double nominalSource;
+		String walletIdDestination;
+		Double nominalDestination;
+
+		private newWalletData(String walletIdSource, Double nominalSource, String walletIdDestination, Double nominalDestination) {
+			this.walletIdSource = walletIdSource;
+			this.nominalSource = nominalSource;
+			this.walletIdDestination = walletIdDestination;
+			this.nominalDestination = nominalDestination;
+		}
+	}
 	
 }

@@ -62,7 +62,7 @@ public class ActivityService {
 			Optional<Wallet> existingWallet = this.walletRepository.findById(newActivity.getWalletId());
 			if (existingWallet.isPresent()) {
 
-				/** check if the balance is sufficient **/
+				// check if the balance is sufficient **/
 				double walletNominal = existingWallet.get().getNominal();
 				double balance;
 				if (!newActivity.isIncome()) {
@@ -72,7 +72,7 @@ public class ActivityService {
 				}
 				
 				if (balance >= 0) {
-					/** update nominal wallet **/
+					// update nominal wallet **/
 					existingWallet.get().setNominal(balance);
 					/**ArrayList<String> tmp = existingWallet.get().getMutasi();
 					if (tmp == null || tmp.isEmpty()) {
@@ -86,7 +86,7 @@ public class ActivityService {
 					tmp.add(0, newActivity.toString());
 					existingWallet.get().setMutasi(tmp);**/
 
-					/** update balance to db **/
+					//update balance to db
 					walletRepository.save(existingWallet.get());
 					
 					Calendar c = Calendar.getInstance();
@@ -146,12 +146,14 @@ public class ActivityService {
 			for (DocumentSnapshot document : querySnapshot.get().getDocuments()) {
 				
 //				System.out.println("??"+document.getDate("dateActivity"));
-				tmp.add(new Activity(document.getString("id"), 
+				tmp.add(new Activity(
+						document.getString("id"),
 						document.getString("walletId"),
 						document.getString("walletName"), 
 						document.getString("titleActivity"),
-						document.getString("descActivity"), 
+						document.getString("categoryActivity"),
 						document.getDouble("nominalActivity"),
+						document.getString("descActivity"),
 						document.getDate("dateActivity"), 
 						document.getBoolean("income")//,
 						//document.getBoolean("expands")
@@ -227,8 +229,9 @@ public class ActivityService {
 						xxx.get().getString("walletId"), 
 						xxx.get().getString("walletName"),
 						xxx.get().getString("titleActivity"),
-						xxx.get().getString("descActivity"),
+						xxx.get().getString("categoryActivity"),
 						xxx.get().getDouble("nominalActivity"),
+						xxx.get().getString("descActivity"),
 						xxx.get().getDate("dateActivity"), 
 						xxx.get().getBoolean("income")//,
 						//xxx.get().getBoolean("expands")

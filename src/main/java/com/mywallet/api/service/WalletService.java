@@ -99,8 +99,9 @@ public class WalletService {
 					w1.getId()+"##"+w2.getId(),
 					w1.getName()+" -> "+w2.getName(),
 					"Transfer",
+					"Transfer",
 					trf.getNominal(),
-					"To: "+w2.getId()+", Fee: "+trf.getFee(),
+					"To: "+w2.getName()+", Fee: "+trf.getFee(),
 					new Date(),
 					false
 					);

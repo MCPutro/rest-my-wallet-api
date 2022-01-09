@@ -22,12 +22,12 @@ public class WalletController {
 
 	@Autowired private WalletService walletService;
 	
-	@PostMapping("/update")
+	@PostMapping("/")
 	public Resp addWallet(@RequestBody Wallet w, @RequestHeader String UID) {
 		return this.walletService.addWallet(w, UID);
 	}
 	
-	@GetMapping("/getByUID")
+	@GetMapping("/")
 	public List<Wallet> getAllWallet(@RequestHeader String UID){
 		return this.walletService.getAllWallet(UID);
 	}
@@ -43,7 +43,7 @@ public class WalletController {
 	}
 	
 	@PostMapping("/cancelTransfer")
-	public Resp cancelTransfer(@RequestBody transfer trf, @RequestHeader String UID, @RequestHeader String period) {
+		public Resp cancelTransfer(@RequestBody transfer trf, @RequestHeader String UID, @RequestHeader String period) {
 		return this.walletService.cancelTransferInternal(trf, UID, period);
 	}
 }
