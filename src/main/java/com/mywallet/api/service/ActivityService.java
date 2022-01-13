@@ -111,9 +111,8 @@ public class ActivityService {
 			ApiFuture<QuerySnapshot> querySnapshot = query.get();
 
 			ArrayList<Activity> tmp = new ArrayList<>();
-			int i = 1;
+
 			for (DocumentSnapshot document : querySnapshot.get().getDocuments()) {
-				System.out.println(i++);
 
 				tmp.add(Activity.builder()
 						.id(document.getString("id"))
