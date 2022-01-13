@@ -69,7 +69,7 @@ public class UserController {
 		
 		Resp create = this.userService.insertUser(user);
 		
-		if (create.getStatus().equalsIgnoreCase("success")){
+		if (create.getStatus() == Resp.Status.success){
 			
 			User firstLogin = new User();
 			firstLogin.setEmail(user.getEmail());
@@ -79,7 +79,7 @@ public class UserController {
 			
 			return ResponseEntity.ok(p);
 		}else {
-			resp.addProperty("status", create.getStatus());
+			resp.addProperty("status", create.getStatus().toString());
 			resp.addProperty("message", create.getMessage());
 			return ResponseEntity.ok(resp.toString());
 		}
@@ -102,19 +102,24 @@ public class UserController {
 			UserDetailImp userDetails = userDetailsService.loadUserByEmail(user.getEmail());
 
 			String token = jwtTokenUtil.generateToken(userDetails);
-			
-			return new Resp("success", null, 
-					new UserSignInResponse(
-							userDetails.getUid(), 
-							userDetails.getDisplayName(), 
-							"Bearer", 
-							token, 
-							this.refreshTokenService.generateRefresToken(user),
-							userDetails.getUrlAvatar()
+
+			return Resp.builder().status(Resp.Status.success)
+					.data(
+							new UserSignInResponse(
+									userDetails.getUid(),
+									userDetails.getDisplayName(),
+									"Bearer",
+									token,
+									this.refreshTokenService.generateRefresToken(user),
+									userDetails.getUrlAvatar()
 							)
-					);
+					)
+					.build();
+
 		} catch (Exception e) {
-			return new Resp("error", e.getMessage());
+			return Resp.builder().status(Resp.Status.error)
+					.message(e.getMessage())
+					.build();//new Resp("error", e.getMessage());
 		}
 	}
 
@@ -143,9 +148,13 @@ public class UserController {
 			Optional<RefreshToken> s = this.refreshTokenService.findByToken(rt.getToken().split("\\.")[0]);
 			
 			if (!s.isPresent()) {
-				return ResponseEntity.ok(new Resp("error", "refresh-token "+rt.getToken()+" not found"));
-			}else {
-				if (this.refreshTokenService.isExpired(s.get()) == false) {
+				return ResponseEntity.ok(
+						Resp.builder().status(Resp.Status.error)
+								.message("refresh-token "+rt.getToken()+" not found")
+								.build()
+				);
+			} else {
+				if (!this.refreshTokenService.isExpired(s.get())) {
 					String token = this.jwtTokenUtil.generateTokenFromEmail(s.get().getUser().getEmail());
 					
 					JsonObject resp = new JsonObject();
@@ -158,12 +167,17 @@ public class UserController {
 					return ResponseEntity.ok(respString);
 				}
 				else {
-					return ResponseEntity.ok(new Resp("error", "refresh-token "+rt.getToken()+" has expired. Please sign in"));
+					return ResponseEntity.ok(
+							//new Resp("error", "refresh-token "+rt.getToken()+" has expired. Please sign in")
+							Resp.builder().status(Resp.Status.error)
+									.message("refresh-token \"+rt.getToken()+\" has expired. Please sign in")
+									.build()
+					);
 				}
 			}
 			
 		} catch (Exception e) {
-			return ResponseEntity.ok(new Resp("error", e.getMessage()));
+			return ResponseEntity.ok(Resp.builder().status(Resp.Status.error).message(e.getMessage()).build());
 		}
 	}
 

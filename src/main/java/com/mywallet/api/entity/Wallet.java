@@ -42,9 +42,6 @@ public class Wallet implements Serializable{
 	@Column(name="nominal")
 	private Double nominal;
 	
-	/**@Column(name="mutasi")
-	private ArrayList<String> mutasi;**/
-	
 	@Column(name="type")
 	private String type;
 
@@ -52,24 +49,24 @@ public class Wallet implements Serializable{
 	@ManyToOne
 	private User user;
 	
-	public Wallet(String id, String backgroundColor, String name, Double nominal, String type) {
-		this.id = id;
-		this.backgroundColor = backgroundColor;
-		this.name = name;
-		this.nominal = nominal;
-		this.textColor = "#FF000000";
-		//this.mutasi = new ArrayList<>();
-		this.type = type;
-	}
-	
-	public Wallet(String id, String backgroundColor, String name, Double nominal, String textColor, String type) {
-		this.id = id;
-		this.backgroundColor = backgroundColor;
-		this.name = name;
-		this.nominal = nominal;
-		this.textColor = textColor;
-		//this.mutasi = new ArrayList<>();
-		this.type = type;
-	}
+//	public Wallet(String id, String backgroundColor, String name, Double nominal, String type) {
+//		this.id = id;
+//		this.backgroundColor = backgroundColor;
+//		this.name = name;
+//		this.nominal = nominal;
+//		this.textColor = "#FF000000";
+//		//this.mutasi = new ArrayList<>();
+//		this.type = type;
+//	}
+//
+//	public Wallet(String id, String backgroundColor, String name, Double nominal, String textColor, String type) {
+//		this.id = id;
+//		this.backgroundColor = backgroundColor;
+//		this.name = name;
+//		this.nominal = nominal;
+//		this.textColor = textColor;
+//		//this.mutasi = new ArrayList<>();
+//		this.type = type;
+//	}
 
 }

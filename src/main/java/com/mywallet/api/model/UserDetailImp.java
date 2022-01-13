@@ -13,7 +13,6 @@ import lombok.Setter;
 @Setter
 @Getter
 @AllArgsConstructor
-@NoArgsConstructor
 public class UserDetailImp implements UserDetails {
 	private static final long serialVersionUID = 1L;
 

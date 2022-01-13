@@ -27,35 +27,42 @@ public class UserService {
 	
 	@Transactional
 	public Resp insertUser(User user) {
-		Resp resp;
 		try {
+			Resp resp;
 			User existing = this.userRepository.findByEmail(user.getEmail());
 			
 			if (existing == null) {
 				user.setRegistrationDate(LocalDateTime.now());
 				Resp r = this.firebaseService.createUser(user);
-				
-				if (r.getStatus().equalsIgnoreCase("success")) {
+
+				if (r.getStatus() == Resp.Status.success) {
 					user.setUid(((UserResponse) r.getData()).getUid());
 					user.setPassword(encoder.encode(user.getPassword()));
 					user.setUrlAvatar(((UserResponse) r.getData()).getUrlAvatar());
 					User result = this.userRepository.save(user);
 					
-					resp = new Resp("success", null, new UserResponse(result.getUid(), result.getUsername(), result.getEmail(), result.getUrlAvatar() ));	
-				}else {
-					resp = new Resp("error", r.getMessage());	
-				}
+					resp = Resp.builder()
+							.status(Resp.Status.success)
+							.data(new UserResponse(result.getUid(), result.getUsername(), result.getEmail(), result.getUrlAvatar() ))
+							.build();
 
-			}else {
-				resp = new Resp("error", "Email already registered", new UserResponse(null, existing.getUsername(), existing.getEmail(), null));	
+				} else {
+					resp = Resp.builder()
+							.status(Resp.Status.error)
+							.message(r.getMessage())
+							.build();
+				}
+			} else {
+				resp =  Resp.builder()
+						.status(Resp.Status.error)
+						.message("Email already registered")
+						.data(new UserResponse(null, existing.getUsername(), existing.getEmail(), null))
+						.build();
 			}
-			
 			return resp;
-			 
 		} catch (Exception e) {
 			System.out.println("error : "+e.getMessage());
-			resp = new Resp("error", e.getMessage(), null);
-			return resp;
+			return Resp.builder().status(Resp.Status.error).message(e.getMessage()).build();
 		}
 	}
 	
@@ -87,7 +94,8 @@ public class UserService {
 			String result = this.firebaseService.update(newUser);
 			
 			if (result != null) {
-				return new Resp("error1", result);
+//				return new Resp("error1", result);
+				return Resp.builder().status(Resp.Status.error).message(result).build();
 			}
 			
 			User existing = this.userRepository.findByUid(newUser.getUid());
@@ -100,10 +108,10 @@ public class UserService {
 			existing.setUrlAvatar(newUser.getUrlAvatar());
 			
 			this.userRepository.save(existing);
-			
-			return new Resp("success", null);
+
+			return Resp.builder().status(Resp.Status.success).build();
 		} catch (Exception e) {
-			return new Resp("error", e.getMessage());
+			return Resp.builder().status(Resp.Status.error).message(e.getMessage()).build();
 		}
 	}
 	

@@ -2,30 +2,30 @@ package com.mywallet.api.response;
 
 import java.io.Serializable;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
-@Setter
 @Getter
-@NoArgsConstructor
-@AllArgsConstructor
+@Builder
 public class Resp implements Serializable{
 
 	private static final long serialVersionUID = -6626462738725154001L;
 
-	private String status;
+	public enum Status {
+		success,
+		error
+	}
+
+	private Status status;
 	
 	private String message;
 	
 	private Data data;
 
-	public Resp(String status, String message) {
-		super();
-		this.status = status;
-		this.message = message;
-	}
+//	public Resp(String status, String message) {
+//		super();
+//		this.status = status;
+//		this.message = message;
+//	}
 	
 	
 }

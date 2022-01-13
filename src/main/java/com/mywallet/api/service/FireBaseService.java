@@ -68,7 +68,7 @@ public class FireBaseService {
 
 	@Transactional
 	public Resp createUser(User baru) {
-		Resp resp;
+
 		try {
 			
 			System.out.println("Start created new user: ");
@@ -85,14 +85,15 @@ public class FireBaseService {
 			UserRecord userRecord = this.firebaseAuth.createUser(request);
 			//System.out.println("Successfully created new user: " + userRecord.getUid());
 			
-			
-			resp = new Resp("success", null);
-			resp.setData(new UserResponse(userRecord.getUid(), userRecord.getDisplayName(), userRecord.getEmail(), userRecord.getPhotoUrl()));
-			return resp;
+			return  Resp.builder()
+					.status(Resp.Status.success)
+					.data(new UserResponse(userRecord.getUid(), userRecord.getDisplayName(), userRecord.getEmail(), userRecord.getPhotoUrl()))
+					.build();
+
+
 		} catch (Exception e) {
 			System.out.println("createUser|error|" + e.getMessage());
-			resp = new Resp("Error", e.getMessage());
-			return resp;
+			return Resp.builder().status(Resp.Status.error).message(e.getMessage()).build();
 		}
 		
 	}
