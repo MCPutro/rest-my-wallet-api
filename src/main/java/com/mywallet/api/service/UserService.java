@@ -14,17 +14,24 @@ import com.mywallet.api.entity.User;
 //import com.mywallet.api.repository.RefreshTokenRepository;
 import com.mywallet.api.repository.UserRepository;
 import com.mywallet.api.response.Resp;
-import com.mywallet.api.response.UserResponse;
+import com.mywallet.api.response.model.UserResponse;
 
 @Service
 public class UserService {
 
-	@Autowired private UserRepository userRepository;
-	
-	@Autowired private FireBaseService firebaseService;
-	
-	@Autowired private PasswordEncoder encoder;
-	
+	private UserRepository userRepository;
+
+	private FireBaseService firebaseService;
+
+	private PasswordEncoder encoder;
+
+	@Autowired
+	public UserService(UserRepository userRepository, FireBaseService firebaseService, PasswordEncoder encoder) {
+		this.userRepository = userRepository;
+		this.firebaseService = firebaseService;
+		this.encoder = encoder;
+	}
+
 	@Transactional
 	public Resp insertUser(User user) {
 		try {

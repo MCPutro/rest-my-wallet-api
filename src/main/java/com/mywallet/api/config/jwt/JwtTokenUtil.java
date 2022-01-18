@@ -20,8 +20,12 @@ public class JwtTokenUtil implements Serializable {
 
 	private static final long serialVersionUID = -2550185165626007488L;
 
+	private final Environment env;
+
 	@Autowired
-	private Environment env;
+	public JwtTokenUtil(Environment env) {
+		this.env = env;
+	}
 
 	/**
 	 * @Value("${jwt:secret}") private String secret;

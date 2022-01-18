@@ -15,7 +15,12 @@ import com.mywallet.api.repository.UserRepository;
 @Service
 public class JwtUserDetailsService implements UserDetailsService {
 	
-	@Autowired private UserRepository userRepository;
+	private UserRepository userRepository;
+
+	@Autowired
+	public JwtUserDetailsService(UserRepository userRepository) {
+		this.userRepository = userRepository;
+	}
 
 	@Override
 	public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {

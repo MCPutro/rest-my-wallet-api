@@ -26,8 +26,12 @@ import java.util.Random;
 @Configuration
 public class FirebaseConfig {
 
+	private final Environment env;
+
 	@Autowired
-	private Environment env;
+	public FirebaseConfig(Environment env) {
+		this.env = env;
+	}
 
 	@Bean
 	public FirebaseAuth firebaseAuth() {

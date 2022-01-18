@@ -8,26 +8,19 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.mywallet.api.config.jwt.JwtTokenUtil;
 import com.mywallet.api.entity.RefreshToken;
 import com.mywallet.api.entity.User;
 import com.mywallet.api.model.UserDetailImp;
-import com.mywallet.api.repository.RefreshTokenRepository;
 import com.mywallet.api.response.Resp;
-import com.mywallet.api.response.UserResponse;
-import com.mywallet.api.response.UserSignInResponse;
+import com.mywallet.api.response.model.UserSignInResponse;
 import com.mywallet.api.service.RefreshTokenService;
 import com.mywallet.api.service.UserService;
 import com.mywallet.api.service.jwt.JwtUserDetailsService;
@@ -39,24 +32,25 @@ import com.google.gson.JsonObject;
 @RequestMapping("/api/user")
 public class UserController {
 
-	@Autowired
 	private UserService userService;
 
-	@Autowired
 	private JwtTokenUtil jwtTokenUtil;
 
-	@Autowired
 	private AuthenticationManager authenticationManager;
 
-	@Autowired
 	private JwtUserDetailsService userDetailsService;
 
-	@Autowired
 	private RefreshTokenService refreshTokenService;
 
-	
-	
-	/****/
+	@Autowired
+	public UserController(UserService userService, JwtTokenUtil jwtTokenUtil, AuthenticationManager authenticationManager, JwtUserDetailsService userDetailsService, RefreshTokenService refreshTokenService) {
+		this.userService = userService;
+		this.jwtTokenUtil = jwtTokenUtil;
+		this.authenticationManager = authenticationManager;
+		this.userDetailsService = userDetailsService;
+		this.refreshTokenService = refreshTokenService;
+	}
+
 	@GetMapping("/")
 	public String onAir() {
 		return "OK";
@@ -123,25 +117,6 @@ public class UserController {
 		}
 	}
 
-	/**@PostMapping(value = "/refresh-token", produces = "application/json")
-	public Optional<?> getTokenByRefreshToken(@RequestBody RefreshToken rt) {
-		try {
-			Optional<?> tmp = this.refreshTokenService.findByToken(rt.getToken())
-					.map(refreshTokenService::verifyExpiration)
-					.map(RefreshToken::getUser)
-					.map(user -> {
-						String token = this.jwtTokenUtil.generateTokenFromEmail(user.getEmail());
-						return ResponseEntity.ok(token);
-					});
-			
-			System.out.println(tmp.toString());
-			
-			return tmp;
-		} catch (Exception e) {
-			return Optional.of("ini error");
-		}
-	}**/
-	
 	@PostMapping(value = "/refresh-token", produces = "application/json")
 	public ResponseEntity<?> getTokenByRefreshToken(@RequestBody RefreshToken rt) {
 		try {
@@ -185,9 +160,9 @@ public class UserController {
 		try {
 			authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(email, password));
 		} catch (DisabledException e) {
-			throw new Exception("USER_DISABLED", e);
+			throw new Exception("USER DISABLED", e);
 		} catch (BadCredentialsException e) {
-			throw new Exception("INVALID_CREDENTIALS", e);
+			throw new Exception("INVALID CREDENTIALS", e);
 		}
 	}
 	

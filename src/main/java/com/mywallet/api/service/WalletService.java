@@ -7,7 +7,7 @@ import com.mywallet.api.model.transfer;
 import com.mywallet.api.repository.UserRepository;
 import com.mywallet.api.repository.WalletRepository;
 import com.mywallet.api.response.Resp;
-import com.mywallet.api.response.transferResp;
+import com.mywallet.api.response.model.transferResp;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -19,12 +19,19 @@ import java.util.List;
 @Service
 public class WalletService {
 
-	@Autowired private WalletRepository walletRepository;
+	private WalletRepository walletRepository;
 	
-	@Autowired private UserRepository userRepository;
+	private UserRepository userRepository;
 	
-	@Autowired private FireBaseService fireBaseService;
-	
+	private FireBaseService fireBaseService;
+
+	@Autowired
+	public WalletService(WalletRepository walletRepository, UserRepository userRepository, FireBaseService fireBaseService) {
+		this.walletRepository = walletRepository;
+		this.userRepository = userRepository;
+		this.fireBaseService = fireBaseService;
+	}
+
 	@Transactional
 	public Resp addWallet(Wallet w, String uid) {
 

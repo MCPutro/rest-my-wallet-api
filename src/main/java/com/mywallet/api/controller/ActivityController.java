@@ -18,8 +18,13 @@ import com.mywallet.api.service.ActivityService;
 @RequestMapping("/api/activity")
 public class ActivityController {
 	
-	@Autowired private ActivityService activityService;
-	
+	private ActivityService activityService;
+
+	@Autowired
+	public ActivityController(ActivityService activityService) {
+		this.activityService = activityService;
+	}
+
 	@PutMapping("/")
 	public Resp addNewActivity(@RequestBody Activity newActivity, @RequestHeader String UID) {
 		return this.activityService.createNewActivity(newActivity, UID);

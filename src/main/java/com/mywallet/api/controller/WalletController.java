@@ -20,8 +20,13 @@ import com.mywallet.api.model.transfer;
 @RequestMapping("/api/wallet")
 public class WalletController {
 
-	@Autowired private WalletService walletService;
-	
+	private WalletService walletService;
+
+	@Autowired
+	public WalletController(WalletService walletService) {
+		this.walletService = walletService;
+	}
+
 	@PostMapping("/")
 	public Resp addWallet(@RequestBody Wallet w, @RequestHeader String UID) {
 		return this.walletService.addWallet(w, UID);

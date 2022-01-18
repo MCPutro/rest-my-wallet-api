@@ -20,22 +20,6 @@ public class Activity {
 	private Date date;
 	private boolean income;
 
-//	public Activity(String id, String walletId, String walletName, String titleActivity, String categoryActivity,
-//			Double nominalActivity,
-//			String descActivity, Date dateActivity, boolean income) {
-//		this.id = id;
-//		this.walletId = walletId;
-//		this.walletName = walletName;
-//		this.titleActivity = titleActivity;
-//		this.categoryActivity = categoryActivity;
-//		this.nominalActivity = nominalActivity;
-//
-//		this.descActivity = descActivity;
-//		this.dateActivity = dateActivity;
-//		this.income = income;
-//
-//	}
-
 	@Override
 	public String toString() {
 		return  walletId + "#" + walletName

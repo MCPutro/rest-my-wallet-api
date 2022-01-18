@@ -1,63 +1,35 @@
 package com.mywallet.api.service;
 
-import java.io.ByteArrayInputStream;
-import java.io.InputStream;
-import java.net.URL;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 import java.util.Random;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.PropertySource;
-import org.springframework.core.env.Environment;
-import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.google.auth.oauth2.GoogleCredentials;
 import com.google.cloud.firestore.CollectionReference;
-import com.google.cloud.firestore.DocumentReference;
-import com.google.cloud.firestore.DocumentSnapshot;
 import com.google.cloud.firestore.Firestore;
-import com.google.cloud.firestore.Query;
-import com.google.cloud.firestore.QueryDocumentSnapshot;
-import com.google.cloud.firestore.QuerySnapshot;
-import com.google.cloud.firestore.SetOptions;
-import com.google.cloud.firestore.WriteResult;
-import com.google.common.base.Charsets;
-import com.google.common.io.Resources;
-import com.google.firebase.FirebaseApp;
-import com.google.firebase.FirebaseOptions;
 import com.google.firebase.auth.*;
 import com.google.firebase.auth.UserRecord.CreateRequest;
 import com.google.firebase.auth.UserRecord.UpdateRequest;
-import com.google.firebase.cloud.FirestoreClient;
 import com.mywallet.api.config.DocumentLabel;
 import com.mywallet.api.entity.User;
 import com.mywallet.api.model.Activity;
 import com.mywallet.api.response.Resp;
-import com.mywallet.api.response.UserResponse;
-import com.google.api.core.ApiFuture;
+import com.mywallet.api.response.model.UserResponse;
 
 @Service
 public class FireBaseService {
 
-	@Autowired
+	//@Autowired
     private FirebaseAuth firebaseAuth;
 	
-	@Autowired
+	//@Autowired
 	private Firestore db;
 	
-	@Autowired
+	//@Autowired
 	private Random r;
 	
-	private String[] url_image = {
+	private final String[] url_image = {
 			"https://firebasestorage.googleapis.com/v0/b/my-wallet-api-93eaa.appspot.com/o/default%2Favatar(1).png?alt=media&token=153551e6-5ce5-4632-a4bf-3d2a0d964658",
 			"https://firebasestorage.googleapis.com/v0/b/my-wallet-api-93eaa.appspot.com/o/default%2Favatar(2).png?alt=media&token=9df29c80-14ca-4b91-b105-5270a5ea1b30",
 			"https://firebasestorage.googleapis.com/v0/b/my-wallet-api-93eaa.appspot.com/o/default%2Favatar(3).png?alt=media&token=0f20be54-5af2-4cd0-947d-5f31de405eed",
@@ -66,9 +38,15 @@ public class FireBaseService {
 			"https://firebasestorage.googleapis.com/v0/b/my-wallet-api-93eaa.appspot.com/o/default%2Favatar(6).png?alt=media&token=ca158247-2925-4628-bb56-4a2a6372f912"
 	};
 
+	@Autowired
+	public FireBaseService(FirebaseAuth firebaseAuth, Firestore db, Random r) {
+		this.firebaseAuth = firebaseAuth;
+		this.db = db;
+		this.r = r;
+	}
+
 	@Transactional
 	public Resp createUser(User baru) {
-
 		try {
 			
 			System.out.println("Start created new user: ");

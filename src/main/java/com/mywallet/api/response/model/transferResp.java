@@ -1,14 +1,15 @@
-package com.mywallet.api.response;
+package com.mywallet.api.response.model;
 
 import com.mywallet.api.model.Activity;
 
+import com.mywallet.api.response.Data;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 
 @Setter
 @Getter
-public class transferResp implements Data{
+public class transferResp implements Data {
 	private String id;
 	private newWalletData newWalletData;
 	private Activity newActivity;

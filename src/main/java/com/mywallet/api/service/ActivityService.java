@@ -8,7 +8,7 @@ import com.mywallet.api.entity.Wallet;
 import com.mywallet.api.model.Activity;
 import com.mywallet.api.model.ActivityList;
 import com.mywallet.api.repository.WalletRepository;
-import com.mywallet.api.response.ActivityUpdateResponse;
+import com.mywallet.api.response.model.ActivityUpdateResponse;
 import com.mywallet.api.response.Data;
 import com.mywallet.api.response.Resp;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,9 +24,15 @@ import java.util.UUID;
 @Service
 public class ActivityService {
 
-	@Autowired private WalletRepository walletRepository;
+	private WalletRepository walletRepository;
 
-	@Autowired private FireBaseService fireBaseService;
+	private FireBaseService fireBaseService;
+
+	@Autowired
+	public ActivityService(WalletRepository walletRepository, FireBaseService fireBaseService) {
+		this.walletRepository = walletRepository;
+		this.fireBaseService = fireBaseService;
+	}
 
 	@Transactional
 	public Resp createNewActivity(Activity newActivity, String UID) {
@@ -37,7 +43,7 @@ public class ActivityService {
 			}
 			Resp resp;
 			Optional<Wallet> existingWallet = this.walletRepository.findById(newActivity.getWalletId());
-			System.out.println(existingWallet.get());
+			//System.out.println(existingWallet.get());
 			if (existingWallet.isPresent()) {
 
 				// check if the balance is sufficient **/

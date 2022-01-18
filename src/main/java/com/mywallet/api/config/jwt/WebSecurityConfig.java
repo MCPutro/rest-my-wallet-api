@@ -16,21 +16,29 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 
-
 @Configuration
 @EnableWebSecurity
 @EnableGlobalMethodSecurity(prePostEnabled = true)
 public class WebSecurityConfig  extends WebSecurityConfigurerAdapter{
 
-	@Autowired
 	private JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
 
-	@Autowired
 	private UserDetailsService jwtUserDetailsService;
 
-	@Autowired
 	private JwtRequestFilter jwtRequestFilter;
-	
+
+	@Autowired
+	public WebSecurityConfig(
+			JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint
+			, UserDetailsService jwtUserDetailsService
+			, JwtRequestFilter jwtRequestFilter
+	) {
+		super();
+		this.jwtAuthenticationEntryPoint = jwtAuthenticationEntryPoint;
+		this.jwtUserDetailsService = jwtUserDetailsService;
+		this.jwtRequestFilter = jwtRequestFilter;
+	}
+
 	@Bean
 	public PasswordEncoder passwordEncoder() {
 		return new BCryptPasswordEncoder();

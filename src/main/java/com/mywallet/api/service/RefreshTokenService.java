@@ -19,15 +19,19 @@ import com.mywallet.api.repository.UserRepository;
 @Service
 public class RefreshTokenService {
 
-	@Autowired
 	private UserRepository userRepository;
 
-	@Autowired
 	private RefreshTokenRepository refreshTokenRepository;
 
-	@Autowired
 	private Environment env;
-	
+
+	@Autowired
+	public RefreshTokenService(UserRepository userRepository, RefreshTokenRepository refreshTokenRepository, Environment env) {
+		this.userRepository = userRepository;
+		this.refreshTokenRepository = refreshTokenRepository;
+		this.env = env;
+	}
+
 	public Optional<RefreshToken> findByToken(String token) {
 		return this.refreshTokenRepository.findByToken(token);
 	}
