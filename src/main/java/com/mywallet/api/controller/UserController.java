@@ -2,6 +2,8 @@ package com.mywallet.api.controller;
 
 import java.util.Optional;
 
+import io.swagger.annotations.ApiOperation;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -16,31 +18,34 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.mywallet.api.config.jwt.JwtTokenUtil;
-import com.mywallet.api.entity.RefreshToken;
-import com.mywallet.api.entity.User;
 import com.mywallet.api.model.UserDetailImp;
-import com.mywallet.api.response.Resp;
-import com.mywallet.api.response.model.UserSignInResponse;
+import com.mywallet.api.response.format.ResponseFormat;
+import com.mywallet.api.response.UserSignInResponse;
 import com.mywallet.api.service.RefreshTokenService;
 import com.mywallet.api.service.UserService;
 import com.mywallet.api.service.jwt.JwtUserDetailsService;
+import com.mywallet.api.documentation.UserApi;
+import com.mywallet.api.request.RefreshTokenRequest;
+import com.mywallet.api.request.UserSignInRequest;
+import com.mywallet.api.request.UserSignUpRequest;
+import com.mywallet.api.request.UserUpdateRequest;
 
 import com.google.gson.JsonObject;
 
 @RestController
 @CrossOrigin
 @RequestMapping("/api/user")
-public class UserController {
+public class UserController implements UserApi {
 
-	private UserService userService;
+	private final UserService userService;
 
-	private JwtTokenUtil jwtTokenUtil;
+	private final JwtTokenUtil jwtTokenUtil;
 
-	private AuthenticationManager authenticationManager;
+	private final AuthenticationManager authenticationManager;
 
-	private JwtUserDetailsService userDetailsService;
+	private final JwtUserDetailsService userDetailsService;
 
-	private RefreshTokenService refreshTokenService;
+	private final RefreshTokenService refreshTokenService;
 
 	@Autowired
 	public UserController(UserService userService, JwtTokenUtil jwtTokenUtil, AuthenticationManager authenticationManager, JwtUserDetailsService userDetailsService, RefreshTokenService refreshTokenService) {
@@ -51,25 +56,28 @@ public class UserController {
 		this.refreshTokenService = refreshTokenService;
 	}
 
+	@ApiOperation(value = "", hidden = true)
 	@GetMapping("/")
 	public String onAir() {
 		return "OK";
 	}
 
+	@Override
 	@PostMapping(value = "/createAndLogin" , produces = "application/json")
-	public ResponseEntity<?> createAndLogin(@RequestBody User user) {
-		String temp = user.getPassword();
+	public ResponseEntity<?> createAndLogin(@RequestBody UserSignUpRequest newUser) {
+		String temp = newUser.getPassword();
 		JsonObject resp = new JsonObject();
 		
-		Resp create = this.userService.insertUser(user);
+		ResponseFormat create = this.userService.insertUser(newUser);
 		
-		if (create.getStatus() == Resp.Status.success){
+		if (create.getStatus() == ResponseFormat.Status.success){
 			
-			User firstLogin = new User();
-			firstLogin.setEmail(user.getEmail());
-			firstLogin.setPassword(temp);
+			UserSignInRequest firstLogin = UserSignInRequest.builder()
+					.email(newUser.getEmail())
+					.password(temp)
+					.build();
 			
-			Resp p = this.signin(firstLogin);
+			ResponseFormat p = this.signin(firstLogin);
 			
 			return ResponseEntity.ok(p);
 		}else {
@@ -80,14 +88,16 @@ public class UserController {
 			
 		//return null;
 	}
-	
+
+	@Override
 	@PostMapping("/signup")
-	public Resp signup(@RequestBody User newUser) {
+	public ResponseFormat signup(@RequestBody UserSignUpRequest newUser) {
 		return this.userService.insertUser(newUser);
 	}
 
+	@Override
 	@PostMapping(value = "/signin", produces = "application/json")
-	public Resp signin(@RequestBody User user) {
+	public ResponseFormat signin(@RequestBody UserSignInRequest user) {
 		try {
 			authenticate(user.getEmail(), user.getPassword());
 
@@ -97,7 +107,7 @@ public class UserController {
 
 			String token = jwtTokenUtil.generateToken(userDetails);
 
-			return Resp.builder().status(Resp.Status.success)
+			return ResponseFormat.builder().status(ResponseFormat.Status.success)
 					.data(
 							new UserSignInResponse(
 									userDetails.getUid(),
@@ -111,21 +121,24 @@ public class UserController {
 					.build();
 
 		} catch (Exception e) {
-			return Resp.builder().status(Resp.Status.error)
+			return ResponseFormat.builder().status(ResponseFormat.Status.error)
 					.message(e.getMessage())
 					.build();//new Resp("error", e.getMessage());
 		}
 	}
 
+	@Override
 	@PostMapping(value = "/refresh-token", produces = "application/json")
-	public ResponseEntity<?> getTokenByRefreshToken(@RequestBody RefreshToken rt) {
+	public ResponseEntity<?> getTokenByRefreshToken(@RequestBody RefreshTokenRequest refreshToken) {
 		try {
-			Optional<RefreshToken> s = this.refreshTokenService.findByToken(rt.getToken().split("\\.")[0]);
+
+			Optional<com.mywallet.api.entity.RefreshToken> s = this.refreshTokenService.findByToken(refreshToken.getRefreshToken().split("\\.")[0]);
+
 			
 			if (!s.isPresent()) {
 				return ResponseEntity.ok(
-						Resp.builder().status(Resp.Status.error)
-								.message("refresh-token "+rt.getToken()+" not found")
+						ResponseFormat.builder().status(ResponseFormat.Status.error)
+								.message("refresh-token "+refreshToken.getRefreshToken()+" not found")
 								.build()
 				);
 			} else {
@@ -135,7 +148,7 @@ public class UserController {
 					JsonObject resp = new JsonObject();
 					resp.addProperty("type", "Bearer");
 					resp.addProperty("token", token);
-					resp.addProperty("refreshToken", rt.getToken());
+					resp.addProperty("refreshToken", refreshToken.getRefreshToken());
 
 					String respString = "{" + "\"status\": \"success\"," + "\"message\": null," + "\"data\": " + resp.toString() + "}";
 
@@ -144,7 +157,7 @@ public class UserController {
 				else {
 					return ResponseEntity.ok(
 							//new Resp("error", "refresh-token "+rt.getToken()+" has expired. Please sign in")
-							Resp.builder().status(Resp.Status.error)
+							ResponseFormat.builder().status(ResponseFormat.Status.error)
 									.message("refresh-token \"+rt.getToken()+\" has expired. Please sign in")
 									.build()
 					);
@@ -152,8 +165,14 @@ public class UserController {
 			}
 			
 		} catch (Exception e) {
-			return ResponseEntity.ok(Resp.builder().status(Resp.Status.error).message(e.getMessage()).build());
+			return ResponseEntity.ok(ResponseFormat.builder().status(ResponseFormat.Status.error).message(e.getMessage()).build());
 		}
+	}
+
+	@Override
+	@PostMapping(value = "/update", produces = "application/json")
+	public ResponseFormat updateUserData(@RequestBody UserUpdateRequest userUpdate) {
+		return this.userService.updateUserData(userUpdate);
 	}
 
 	private void authenticate(String email, String password) throws Exception {
@@ -165,11 +184,7 @@ public class UserController {
 			throw new Exception("INVALID CREDENTIALS", e);
 		}
 	}
-	
-	@PostMapping(value = "/update", produces = "application/json")
-	public Resp updateUserData(@RequestBody User user) {
-		
-		return this.userService.updateUserData(user);
-	}
+
+
 
 }

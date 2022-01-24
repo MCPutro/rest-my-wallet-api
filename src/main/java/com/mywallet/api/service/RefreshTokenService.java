@@ -6,6 +6,7 @@ import java.util.Date;
 import java.util.Optional;
 import java.util.UUID;
 
+import com.mywallet.api.request.UserSignInRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Service;
@@ -37,7 +38,7 @@ public class RefreshTokenService {
 	}
 
 	@Transactional
-	public String generateRefresToken(User user) {
+	public String generateRefresToken(UserSignInRequest user) {
 		try {
 			User existing = this.userRepository.findByEmail(user.getEmail());
 

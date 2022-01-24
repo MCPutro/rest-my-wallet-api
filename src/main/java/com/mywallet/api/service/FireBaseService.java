@@ -2,6 +2,7 @@ package com.mywallet.api.service;
 
 import java.util.Random;
 
+import com.mywallet.api.request.UserUpdateRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -14,8 +15,8 @@ import com.google.firebase.auth.UserRecord.UpdateRequest;
 import com.mywallet.api.config.DocumentLabel;
 import com.mywallet.api.entity.User;
 import com.mywallet.api.model.Activity;
-import com.mywallet.api.response.Resp;
-import com.mywallet.api.response.model.UserResponse;
+import com.mywallet.api.response.format.ResponseFormat;
+import com.mywallet.api.response.UserResponse;
 
 @Service
 public class FireBaseService {
@@ -46,7 +47,7 @@ public class FireBaseService {
 	}
 
 	@Transactional
-	public Resp createUser(User baru) {
+	public ResponseFormat createUser(User baru) {
 		try {
 			
 			System.out.println("Start created new user: ");
@@ -63,15 +64,15 @@ public class FireBaseService {
 			UserRecord userRecord = this.firebaseAuth.createUser(request);
 			//System.out.println("Successfully created new user: " + userRecord.getUid());
 			
-			return  Resp.builder()
-					.status(Resp.Status.success)
+			return  ResponseFormat.builder()
+					.status(ResponseFormat.Status.success)
 					.data(new UserResponse(userRecord.getUid(), userRecord.getDisplayName(), userRecord.getEmail(), userRecord.getPhotoUrl()))
 					.build();
 
 
 		} catch (Exception e) {
 			System.out.println("createUser|error|" + e.getMessage());
-			return Resp.builder().status(Resp.Status.error).message(e.getMessage()).build();
+			return ResponseFormat.builder().status(ResponseFormat.Status.error).message(e.getMessage()).build();
 		}
 		
 	}
@@ -98,7 +99,7 @@ public class FireBaseService {
 	}
 	
 	@Transactional
-	public String update(User newUser) {
+	public String update(UserUpdateRequest newUser) {
 		try {
 			UpdateRequest request = new UpdateRequest(newUser.getUid())
 				    .setEmail(newUser.getEmail())

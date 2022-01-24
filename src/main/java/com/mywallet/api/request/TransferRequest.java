@@ -1,4 +1,4 @@
-package com.mywallet.api.model;
+package com.mywallet.api.request;
 
 import lombok.Builder;
 import lombok.Getter;
@@ -6,7 +6,7 @@ import lombok.Getter;
 
 @Getter
 @Builder
-public class transfer {
+public class TransferRequest {
 	private String id;
 	private String walletIdSource;
 	private String walletIdDestination;

@@ -2,6 +2,7 @@ package com.mywallet.api.controller;
 
 import java.util.List;
 
+import com.mywallet.api.documentation.WalletApi;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -12,15 +13,15 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.mywallet.api.entity.Wallet;
-import com.mywallet.api.response.Resp;
+import com.mywallet.api.response.format.ResponseFormat;
 import com.mywallet.api.service.WalletService;
-import com.mywallet.api.model.transfer;
+import com.mywallet.api.request.TransferRequest;
 
 @RestController
 @RequestMapping("/api/wallet")
-public class WalletController {
+public class WalletController implements WalletApi {
 
-	private WalletService walletService;
+	private final WalletService walletService;
 
 	@Autowired
 	public WalletController(WalletService walletService) {
@@ -28,7 +29,7 @@ public class WalletController {
 	}
 
 	@PostMapping("/")
-	public Resp addWallet(@RequestBody Wallet w, @RequestHeader String UID) {
+	public ResponseFormat addWallet(@RequestBody Wallet w, @RequestHeader String UID) {
 		return this.walletService.addWallet(w, UID);
 	}
 	
@@ -38,17 +39,17 @@ public class WalletController {
 	}
 	
 	@DeleteMapping("/")
-	public Resp removeWallet(@RequestHeader String walletId) {
+	public ResponseFormat removeWallet(@RequestHeader String walletId) {
 		return this.walletService.removeWallet(walletId);
 	}
 	
 	@PostMapping("/transfer")
-	public Resp transfer(@RequestBody transfer trf, @RequestHeader String UID) {
+	public ResponseFormat transfer(@RequestBody TransferRequest trf, @RequestHeader String UID) {
 		return this.walletService.transferInternal(trf, UID);
 	}
 	
 	@PostMapping("/cancelTransfer")
-		public Resp cancelTransfer(@RequestBody transfer trf, @RequestHeader String UID, @RequestHeader String period) {
+		public ResponseFormat cancelTransfer(@RequestBody TransferRequest trf, @RequestHeader String UID, @RequestHeader String period) {
 		return this.walletService.cancelTransferInternal(trf, UID, period);
 	}
 }

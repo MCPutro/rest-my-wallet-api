@@ -3,11 +3,11 @@ package com.mywallet.api.service;
 import com.mywallet.api.entity.User;
 import com.mywallet.api.entity.Wallet;
 import com.mywallet.api.model.Activity;
-import com.mywallet.api.model.transfer;
+import com.mywallet.api.request.TransferRequest;
 import com.mywallet.api.repository.UserRepository;
 import com.mywallet.api.repository.WalletRepository;
-import com.mywallet.api.response.Resp;
-import com.mywallet.api.response.model.transferResp;
+import com.mywallet.api.response.format.ResponseFormat;
+import com.mywallet.api.response.transferResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -33,25 +33,25 @@ public class WalletService {
 	}
 
 	@Transactional
-	public Resp addWallet(Wallet w, String uid) {
+	public ResponseFormat addWallet(Wallet w, String uid) {
 
 		try {
-			Resp resp;
+			ResponseFormat resp;
 			User existing = this.userRepository.findByUid(uid);
 			
 			if (existing != null) {
 				w.setUser(existing);
 				this.walletRepository.save(w);
 				
-				resp = Resp.builder().status(Resp.Status.success).build();
+				resp = ResponseFormat.builder().status(ResponseFormat.Status.success).build();
 			} else {
 				System.out.println("user gak ketemu");
-				resp = Resp.builder().status(Resp.Status.error).message("user doesn't exist").build();
+				resp = ResponseFormat.builder().status(ResponseFormat.Status.error).message("user doesn't exist").build();
 			}
 			return resp;
 		} catch (Exception e) {
 			System.out.println(e.getMessage());
-			return Resp.builder().status(Resp.Status.error).message(e.getMessage()).build();
+			return ResponseFormat.builder().status(ResponseFormat.Status.error).message(e.getMessage()).build();
 		}
 	}
 	
@@ -62,20 +62,20 @@ public class WalletService {
 	}
 	
 	@Transactional
-	public Resp removeWallet(String walletId) {
+	public ResponseFormat removeWallet(String walletId) {
 		try {
 
 			this.walletRepository.deleteById(walletId);
 			
-			return Resp.builder().status(Resp.Status.success).build();
+			return ResponseFormat.builder().status(ResponseFormat.Status.success).build();
 		} catch (Exception e) {
 			System.out.println(e.getMessage());
-			return Resp.builder().status(Resp.Status.error).message(e.getMessage()).build();
+			return ResponseFormat.builder().status(ResponseFormat.Status.error).message(e.getMessage()).build();
 		}
 	}
 	
 	@Transactional
-	public Resp transferInternal(transfer trf, String UID) {
+	public ResponseFormat transferInternal(TransferRequest trf, String UID) {
 		try {
 			Wallet w1 = this.walletRepository.findById(trf.getWalletIdSource()).orElse(null);
 			
@@ -115,15 +115,15 @@ public class WalletService {
 					a);
 			
 			//return new Resp("success", null, new transferResp(trf.getId(), w1.getId(), w1.getNominal(), w2.getId(), w2.getNominal(), a));
-			return Resp.builder().status(Resp.Status.success)
-					.data(new transferResp(trf.getId(), w1.getId(), w1.getNominal(), w2.getId(), w2.getNominal(), a)).build();
+			return ResponseFormat.builder().status(ResponseFormat.Status.success)
+					.data(new transferResponse(trf.getId(), w1.getId(), w1.getNominal(), w2.getId(), w2.getNominal(), a)).build();
 		} catch (Exception e) {
-			return Resp.builder().status(Resp.Status.error).message(e.getMessage()).build();//new Resp("error", null);
+			return ResponseFormat.builder().status(ResponseFormat.Status.error).message(e.getMessage()).build();//new Resp("error", null);
 		}
 	}
 	
 	@Transactional
-	public Resp cancelTransferInternal(transfer trf, String UID, String period) {
+	public ResponseFormat cancelTransferInternal(TransferRequest trf, String UID, String period) {
 		try {
 			Wallet w1 = this.walletRepository.findById(trf.getWalletIdSource()).orElse(null);
 			
@@ -145,10 +145,10 @@ public class WalletService {
 					.delete()
 					;
 			//return new Resp("success", null, new transferResp(trf.getId(), w1.getId(), w1.getNominal(), w2.getId(), w2.getNominal(), null));
-			return Resp.builder().status(Resp.Status.success)
-					.data(new transferResp(trf.getId(), w1.getId(), w1.getNominal(), w2.getId(), w2.getNominal(), null)).build();
+			return ResponseFormat.builder().status(ResponseFormat.Status.success)
+					.data(new transferResponse(trf.getId(), w1.getId(), w1.getNominal(), w2.getId(), w2.getNominal(), null)).build();
 		} catch (Exception e) {
-			return Resp.builder().status(Resp.Status.error).message(e.getMessage()).build();
+			return ResponseFormat.builder().status(ResponseFormat.Status.error).message(e.getMessage()).build();
 		}
 	}
 	

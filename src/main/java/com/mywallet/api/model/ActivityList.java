@@ -2,7 +2,7 @@ package com.mywallet.api.model;
 
 import java.util.ArrayList;
 
-import com.mywallet.api.response.Data;
+import com.mywallet.api.response.format.Data;
 
 import lombok.*;
 

@@ -74,29 +74,48 @@ public class WebSecurityConfig  extends WebSecurityConfigurerAdapter{
 //		http.csrf().disable();
 //	}
 	
+//	@Override
+//	protected void configure(HttpSecurity httpSecurity) throws Exception {
+//		// We don't need CSRF for this example
+//		httpSecurity.csrf().disable()
+//				// dont authenticate this particular request
+//				//.authorizeRequests().antMatchers("/api/user/**").permitAll()//.authorizeRequests().antMatchers("/authenticate", "/register").permitAll()
+//				.authorizeRequests().antMatchers(
+//						"/api/user/createAndLogin",
+//						"/api/user/signup",
+//						"/api/user/signin",
+//						"/api/user/refresh-token",
+//						"/api/user/",
+//						).permitAll()
+//				// all other requests need to be authenticated
+//				.anyRequest().authenticated().and()
+//				// make sure we use stateless session; session won't be used to
+//				// store user's state.
+//				.exceptionHandling().authenticationEntryPoint(jwtAuthenticationEntryPoint).and().sessionManagement()
+//				.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+//				;
+//
+//		// Add a filter to validate the tokens with every request
+//		httpSecurity.addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class);
+//	}
+
 	@Override
 	protected void configure(HttpSecurity httpSecurity) throws Exception {
-		// We don't need CSRF for this example
+		// Disable CSRF
 		httpSecurity.csrf().disable()
-				// dont authenticate this particular request
-				//.authorizeRequests().antMatchers("/api/user/**").permitAll()//.authorizeRequests().antMatchers("/authenticate", "/register").permitAll()
-				.authorizeRequests().antMatchers(
-						"/api/user/createAndLogin",
-						"/api/user/signup",
-						"/api/user/signin",
-						"/api/user/refresh-token",
-						"/api/user/"
-						).permitAll()
-				// all other requests need to be authenticated
-				.anyRequest().authenticated().and()
-				// make sure we use stateless session; session won't be used to
-				// store user's state.
-				.exceptionHandling().authenticationEntryPoint(jwtAuthenticationEntryPoint).and().sessionManagement()
-				.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-				;
+				.authorizeRequests()
+				// any authenticated user can perform all other operations
+				.antMatchers("/api/wallet/**", "/api/activity/**", "/api/user/update").authenticated()
+				// Permit all other request without authentication
+				.and().authorizeRequests().anyRequest().permitAll()
+				// Reject every unauthenticated request and send error code 401.
+				.and().exceptionHandling().authenticationEntryPoint(jwtAuthenticationEntryPoint)
+				// We don't need sessions to be created.
+				.and().sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
 
 		// Add a filter to validate the tokens with every request
 		httpSecurity.addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class);
 	}
+
 
 }

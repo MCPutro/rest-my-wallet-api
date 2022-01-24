@@ -4,6 +4,8 @@ import java.time.LocalDateTime;
 //import java.time.Instant;
 //import java.util.UUID;
 
+import com.mywallet.api.request.UserSignUpRequest;
+import com.mywallet.api.request.UserUpdateRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -13,8 +15,8 @@ import org.springframework.transaction.annotation.Transactional;
 import com.mywallet.api.entity.User;
 //import com.mywallet.api.repository.RefreshTokenRepository;
 import com.mywallet.api.repository.UserRepository;
-import com.mywallet.api.response.Resp;
-import com.mywallet.api.response.model.UserResponse;
+import com.mywallet.api.response.format.ResponseFormat;
+import com.mywallet.api.response.UserResponse;
 
 @Service
 public class UserService {
@@ -33,43 +35,46 @@ public class UserService {
 	}
 
 	@Transactional
-	public Resp insertUser(User user) {
+	public ResponseFormat insertUser(UserSignUpRequest newUser) {
 		try {
-			Resp resp;
-			User existing = this.userRepository.findByEmail(user.getEmail());
+			ResponseFormat resp;
+			User user = this.userRepository.findByEmail(newUser.getEmail());
 			
-			if (existing == null) {
+			if (user == null) {
+				user = new User(newUser.getEmail(), newUser.getPassword(), newUser.getUsername(), null, null);
+				user.setDeviceId(newUser.getDeviceId());
 				user.setRegistrationDate(LocalDateTime.now());
-				Resp r = this.firebaseService.createUser(user);
 
-				if (r.getStatus() == Resp.Status.success) {
+				ResponseFormat r = this.firebaseService.createUser(user);
+
+				if (r.getStatus() == ResponseFormat.Status.success) {
 					user.setUid(((UserResponse) r.getData()).getUid());
 					user.setPassword(encoder.encode(user.getPassword()));
 					user.setUrlAvatar(((UserResponse) r.getData()).getUrlAvatar());
 					User result = this.userRepository.save(user);
 					
-					resp = Resp.builder()
-							.status(Resp.Status.success)
+					resp = ResponseFormat.builder()
+							.status(ResponseFormat.Status.success)
 							.data(new UserResponse(result.getUid(), result.getUsername(), result.getEmail(), result.getUrlAvatar() ))
 							.build();
 
 				} else {
-					resp = Resp.builder()
-							.status(Resp.Status.error)
+					resp = ResponseFormat.builder()
+							.status(ResponseFormat.Status.error)
 							.message(r.getMessage())
 							.build();
 				}
 			} else {
-				resp =  Resp.builder()
-						.status(Resp.Status.error)
+				resp =  ResponseFormat.builder()
+						.status(ResponseFormat.Status.error)
 						.message("Email already registered")
-						.data(new UserResponse(null, existing.getUsername(), existing.getEmail(), null))
+						.data(new UserResponse(null, user.getUsername(), user.getEmail(), null))
 						.build();
 			}
 			return resp;
 		} catch (Exception e) {
 			System.out.println("error : "+e.getMessage());
-			return Resp.builder().status(Resp.Status.error).message(e.getMessage()).build();
+			return ResponseFormat.builder().status(ResponseFormat.Status.error).message(e.getMessage()).build();
 		}
 	}
 	
@@ -95,14 +100,14 @@ public class UserService {
 	}	
 	
 	@Transactional
-	public Resp updateUserData(User newUser) {
+	public ResponseFormat updateUserData(UserUpdateRequest newUser) {
 		try {
 			
 			String result = this.firebaseService.update(newUser);
 			
 			if (result != null) {
 //				return new Resp("error1", result);
-				return Resp.builder().status(Resp.Status.error).message(result).build();
+				return ResponseFormat.builder().status(ResponseFormat.Status.error).message(result).build();
 			}
 			
 			User existing = this.userRepository.findByUid(newUser.getUid());
@@ -116,9 +121,9 @@ public class UserService {
 			
 			this.userRepository.save(existing);
 
-			return Resp.builder().status(Resp.Status.success).build();
+			return ResponseFormat.builder().status(ResponseFormat.Status.success).build();
 		} catch (Exception e) {
-			return Resp.builder().status(Resp.Status.error).message(e.getMessage()).build();
+			return ResponseFormat.builder().status(ResponseFormat.Status.error).message(e.getMessage()).build();
 		}
 	}
 	

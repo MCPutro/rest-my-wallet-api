@@ -8,9 +8,9 @@ import com.mywallet.api.entity.Wallet;
 import com.mywallet.api.model.Activity;
 import com.mywallet.api.model.ActivityList;
 import com.mywallet.api.repository.WalletRepository;
-import com.mywallet.api.response.model.ActivityUpdateResponse;
-import com.mywallet.api.response.Data;
-import com.mywallet.api.response.Resp;
+import com.mywallet.api.response.ActivityUpdateResponse;
+import com.mywallet.api.response.format.Data;
+import com.mywallet.api.response.format.ResponseFormat;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -35,13 +35,13 @@ public class ActivityService {
 	}
 
 	@Transactional
-	public Resp createNewActivity(Activity newActivity, String UID) {
+	public ResponseFormat createNewActivity(Activity newActivity, String UID) {
 		try {
 			
 			if (newActivity.getId() == null) {
 				newActivity.setId(UUID.randomUUID().toString());
 			}
-			Resp resp;
+			ResponseFormat resp;
 			Optional<Wallet> existingWallet = this.walletRepository.findById(newActivity.getWalletId());
 			//System.out.println(existingWallet.get());
 			if (existingWallet.isPresent()) {
@@ -73,8 +73,8 @@ public class ActivityService {
 							newActivity);
 
 					if (err == null) {
-						resp = Resp.builder()
-								.status(Resp.Status.success)
+						resp = ResponseFormat.builder()
+								.status(ResponseFormat.Status.success)
 								.data(new Data() {
 									public final String activityId = newActivity.getId();
 									public final String walletId = existingWallet.get().getId();
@@ -83,31 +83,31 @@ public class ActivityService {
 								.build();
 
 					} else {
-						resp = Resp.builder().status(Resp.Status.error).message(err).build();
+						resp = ResponseFormat.builder().status(ResponseFormat.Status.error).message(err).build();
 					}
 
 				} else {
-					resp = Resp.builder().status(Resp.Status.error).message("not enough balance").build();
+					resp = ResponseFormat.builder().status(ResponseFormat.Status.error).message("not enough balance").build();
 				}
 				System.out.println("end : " + LocalDateTime.now());
 			} else {
-				resp = Resp.builder().status(Resp.Status.error).message("wallet id " + newActivity.getWalletId() + " doesn't exists").build();
+				resp = ResponseFormat.builder().status(ResponseFormat.Status.error).message("wallet id " + newActivity.getWalletId() + " doesn't exists").build();
 			}
 
 			return resp;
 		} catch (Throwable e) {
 			System.out.println(
 					"ActivityService|createNewActivity|error|" + LocalDateTime.now() + "|" + e.getMessage()+"|"+new Gson().toJson(newActivity));
-			return Resp.builder().status(Resp.Status.error).message(e.getMessage()).build();
+			return ResponseFormat.builder().status(ResponseFormat.Status.error).message(e.getMessage()).build();
 		}
 	}
 
 	
 
 	@Transactional
-	public Resp getActivities(String UID, String period) {
+	public ResponseFormat getActivities(String UID, String period) {
 		try {
-			Resp resp;
+			ResponseFormat resp;
 			CollectionReference cities = this.fireBaseService.getActivityCollectionReference(UID, period);
 			Query query = cities
 					.orderBy("date", Direction.DESCENDING)
@@ -135,15 +135,15 @@ public class ActivityService {
 			}
 			
 
-			resp = Resp.builder()
-					.status(Resp.Status.success)
+			resp = ResponseFormat.builder()
+					.status(ResponseFormat.Status.success)
 					.data(ActivityList.builder().period(period).activities(tmp).build())
 					.build();
 
 			return resp;
 		} catch (Exception e) {
-			return Resp.builder()
-					.status(Resp.Status.error)
+			return ResponseFormat.builder()
+					.status(ResponseFormat.Status.error)
 					.message(e.getMessage())
 					.build();
 		}
@@ -151,7 +151,7 @@ public class ActivityService {
 	}
 
 	@Transactional
-	public Resp removeActivity(String uid, String activityId, String period) {
+	public ResponseFormat removeActivity(String uid, String activityId, String period) {
 		try {
 			DocumentReference writeResult = this.fireBaseService.getActivityCollectionReference(uid, period)
 					.document(activityId)
@@ -175,24 +175,24 @@ public class ActivityService {
 				//System.out.println("nominal : " + writeResult.get().get().getDouble("nominalActivity"));
 				writeResult.delete();
 
-				return Resp.builder()
-						.status(Resp.Status.success)
+				return ResponseFormat.builder()
+						.status(ResponseFormat.Status.success)
 						.data(new Data() {
 							public final String walletid = existingWallet.getId();
 							public final Double remainingBalance = existingWallet.getNominal();
 						})
 						.build();
 			}else {
-				return Resp.builder().status(Resp.Status.error).message("data not found.").build();
+				return ResponseFormat.builder().status(ResponseFormat.Status.error).message("data not found.").build();
 			}
 			
 		} catch (Throwable e) {
-			return Resp.builder().status(Resp.Status.error).message(e.getMessage()).build();
+			return ResponseFormat.builder().status(ResponseFormat.Status.error).message(e.getMessage()).build();
 		}
 	}
 	
 	@Transactional
-	public Resp updateActivity(String UID, String period, Activity activity) {
+	public ResponseFormat updateActivity(String UID, String period, Activity activity) {
 		
 		try {
 			//get prev wallet 
@@ -202,7 +202,7 @@ public class ActivityService {
 				ApiFuture<DocumentSnapshot> doc = this.fireBaseService.getActivityCollectionReference(UID, period).document(activity.getId()).get();
 				
 				if (doc.get().getString("id") == null) {
-					return Resp.builder().status(Resp.Status.error).message("Activity not found").build();
+					return ResponseFormat.builder().status(ResponseFormat.Status.error).message("Activity not found").build();
 				}
 				
 				Activity prevActivity = Activity.builder()
@@ -237,20 +237,20 @@ public class ActivityService {
 						this.walletRepository.save(prevWallet);
 					}
 					System.out.println("ok "+activity.getDate());
-					return Resp.builder()
-							.status(Resp.Status.success)
+					return ResponseFormat.builder()
+							.status(ResponseFormat.Status.success)
 							.data(new ActivityUpdateResponse(prevWallet, activity))
 							.build();
 				}else {
-					return Resp.builder().status(Resp.Status.error).message(err).build();
+					return ResponseFormat.builder().status(ResponseFormat.Status.error).message(err).build();
 				}
 			}
 			
-			return Resp.builder().status(Resp.Status.error).message("Internal Server Error").build();
+			return ResponseFormat.builder().status(ResponseFormat.Status.error).message("Internal Server Error").build();
 			
 			
 		} catch (Exception e) {
-			return Resp.builder().status(Resp.Status.error).message(e.getMessage()).build();
+			return ResponseFormat.builder().status(ResponseFormat.Status.error).message(e.getMessage()).build();
 		}
 		
 		
