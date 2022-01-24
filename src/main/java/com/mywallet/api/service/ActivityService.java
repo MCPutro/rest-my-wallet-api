@@ -129,6 +129,7 @@ public class ActivityService {
 						.nominal(document.getDouble("nominal"))
 						.date(document.getDate("date"))
 						.income(document.getBoolean("income"))
+						.desc(document.getString("desc"))
 						.build()
 					);
 			}
