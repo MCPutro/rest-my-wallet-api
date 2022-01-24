@@ -19,7 +19,7 @@ public class UserRepositoryTest {
     void TestInsert() {
         User u = new User();
         u.setEmail("haha");
-        u.setPassword("hahaha");
+        u.setPassword("hahaha1");
         u.setUsername("hahaha");
         u.setDeviceId("hahaha");
         u.setUrlAvatar("hahaha");
