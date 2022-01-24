@@ -11,9 +11,9 @@ spring:
     tomcat:
       test-while-idle: true
       validation-query: SELECT 1
-    url: jdbc:postgresql://localhost:5432/postgres?sslmode=disable #${db_Database_url} #
-    username:  postgres # ${db_User} #
-    password:  welcome1 # ${db_Password} #
+    url: ${db_Database_url:jdbc:postgresql://localhost:5432/postgres?sslmode=disable} #jdbc:postgresql://localhost:5432/postgres?sslmode=disable #
+    username:  ${db_User:postgres} #postgres #
+    password:  ${db_Password:welcome1} #welcome1 #
   jpa:
     hibernate:
       ddl-auto: update
@@ -24,9 +24,10 @@ spring:
           time-zone: Asia/Jakarta
     show-sql: true
 
-limitActivity: 10
+
+#limitActivity: 10
 
 jwt-key:
-  secret:  ${jwt-key-secret} #
-  expirationMs: ${jwt-key-expirationMs}
-  refreshExp : ${jwt-key-refreshExp}
+  secret:  ${jwt-key-secret:mcputro} #mcputro #
+  expirationMs: ${jwt-key-expirationMs:1800000} #1800000 #30menit #300000 #5menit  #
+  refreshExp : ${jwt-key-refreshExp:604800000} #600000 #10menit #604800000 #7hari #
