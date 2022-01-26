@@ -2,7 +2,7 @@ package com.mywallet.api.controller;
 
 import java.util.List;
 
-import com.mywallet.api.documentation.WalletApi;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -16,6 +16,8 @@ import com.mywallet.api.entity.Wallet;
 import com.mywallet.api.response.format.ResponseFormat;
 import com.mywallet.api.service.WalletService;
 import com.mywallet.api.request.TransferRequest;
+import com.mywallet.api.documentation.WalletApi;
+
 
 @RestController
 @RequestMapping("/api/wallet")

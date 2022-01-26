@@ -1,8 +1,6 @@
 package com.mywallet.api.service;
 
 import java.time.LocalDateTime;
-//import java.time.Instant;
-//import java.util.UUID;
 
 import com.mywallet.api.request.UserSignUpRequest;
 import com.mywallet.api.request.UserUpdateRequest;
@@ -11,24 +9,22 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-//import com.mywallet.api.entity.RefreshToken;
 import com.mywallet.api.entity.User;
-//import com.mywallet.api.repository.RefreshTokenRepository;
 import com.mywallet.api.repository.UserRepository;
 import com.mywallet.api.response.format.ResponseFormat;
 import com.mywallet.api.response.UserResponse;
 
 @Service
-public class UserService {
+public class UserServiceImpl implements UserService{
 
-	private UserRepository userRepository;
+	private final UserRepository userRepository;
 
-	private FireBaseService firebaseService;
+	private final FireBaseService firebaseService;
 
-	private PasswordEncoder encoder;
+	private final PasswordEncoder encoder;
 
 	@Autowired
-	public UserService(UserRepository userRepository, FireBaseService firebaseService, PasswordEncoder encoder) {
+	public UserServiceImpl(UserRepository userRepository, FireBaseService firebaseService, PasswordEncoder encoder) {
 		this.userRepository = userRepository;
 		this.firebaseService = firebaseService;
 		this.encoder = encoder;
@@ -81,8 +77,7 @@ public class UserService {
 	public User getUserById(User user) {
 		//Resp resp;
 		try {
-			User existing = this.userRepository.findByUid(user.getUid());
-			return existing;
+			return this.userRepository.findByUid(user.getUid());
 		}catch (Exception e) {
 			return null;
 		}
@@ -91,9 +86,7 @@ public class UserService {
 	public User getUserByEmail(User user) {
 		//Resp resp;
 		try {
-			User existing = this.userRepository.findByEmail(user.getEmail());
-			
-			return existing;
+			return this.userRepository.findByEmail(user.getEmail());
 		}catch (Exception e) {
 			return null;
 		}
@@ -103,7 +96,7 @@ public class UserService {
 	public ResponseFormat updateUserData(UserUpdateRequest newUser) {
 		try {
 			
-			String result = this.firebaseService.update(newUser);
+			String result = this.firebaseService.updateUserInfo(newUser);
 			
 			if (result != null) {
 //				return new Resp("error1", result);

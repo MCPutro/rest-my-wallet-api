@@ -2,6 +2,8 @@ package com.mywallet.api.controller;
 
 import java.util.Optional;
 
+import com.mywallet.api.service.RefreshTokenService;
+import com.mywallet.api.service.UserService;
 import io.swagger.annotations.ApiOperation;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,9 +23,8 @@ import com.mywallet.api.config.jwt.JwtTokenUtil;
 import com.mywallet.api.model.UserDetailImp;
 import com.mywallet.api.response.format.ResponseFormat;
 import com.mywallet.api.response.UserSignInResponse;
-import com.mywallet.api.service.RefreshTokenService;
-import com.mywallet.api.service.UserService;
-import com.mywallet.api.service.jwt.JwtUserDetailsService;
+import com.mywallet.api.service.RefreshTokenServiceImpl;
+import com.mywallet.api.service.JwtUserDetailsService;
 import com.mywallet.api.documentation.UserApi;
 import com.mywallet.api.request.RefreshTokenRequest;
 import com.mywallet.api.request.UserSignInRequest;
@@ -48,7 +49,9 @@ public class UserController implements UserApi {
 	private final RefreshTokenService refreshTokenService;
 
 	@Autowired
-	public UserController(UserService userService, JwtTokenUtil jwtTokenUtil, AuthenticationManager authenticationManager, JwtUserDetailsService userDetailsService, RefreshTokenService refreshTokenService) {
+	public UserController(UserService userService, JwtTokenUtil jwtTokenUtil,
+						  AuthenticationManager authenticationManager, JwtUserDetailsService userDetailsService,
+						  RefreshTokenService refreshTokenService) {
 		this.userService = userService;
 		this.jwtTokenUtil = jwtTokenUtil;
 		this.authenticationManager = authenticationManager;

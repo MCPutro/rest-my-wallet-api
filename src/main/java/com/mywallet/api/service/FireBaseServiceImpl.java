@@ -19,15 +19,12 @@ import com.mywallet.api.response.format.ResponseFormat;
 import com.mywallet.api.response.UserResponse;
 
 @Service
-public class FireBaseService {
+public class FireBaseServiceImpl implements FireBaseService{
 
-	//@Autowired
-    private FirebaseAuth firebaseAuth;
+	private final FirebaseAuth firebaseAuth;
 	
-	//@Autowired
-	private Firestore db;
+	private final Firestore db;
 	
-	//@Autowired
 	private Random r;
 	
 	private final String[] url_image = {
@@ -40,7 +37,7 @@ public class FireBaseService {
 	};
 
 	@Autowired
-	public FireBaseService(FirebaseAuth firebaseAuth, Firestore db, Random r) {
+	public FireBaseServiceImpl(FirebaseAuth firebaseAuth, Firestore db, Random r) {
 		this.firebaseAuth = firebaseAuth;
 		this.db = db;
 		this.r = r;
@@ -99,7 +96,7 @@ public class FireBaseService {
 	}
 	
 	@Transactional
-	public String update(UserUpdateRequest newUser) {
+	public String updateUserInfo(UserUpdateRequest newUser) {
 		try {
 			UpdateRequest request = new UpdateRequest(newUser.getUid())
 				    .setEmail(newUser.getEmail())

@@ -1,4 +1,4 @@
-package com.mywallet.api.service.jwt;
+package com.mywallet.api.service;
 
 import java.util.ArrayList;
 

@@ -18,16 +18,16 @@ import com.mywallet.api.repository.RefreshTokenRepository;
 import com.mywallet.api.repository.UserRepository;
 
 @Service
-public class RefreshTokenService {
+public class RefreshTokenServiceImpl implements RefreshTokenService{
 
-	private UserRepository userRepository;
+	private final UserRepository userRepository;
 
-	private RefreshTokenRepository refreshTokenRepository;
+	private final RefreshTokenRepository refreshTokenRepository;
 
-	private Environment env;
+	private final Environment env;
 
 	@Autowired
-	public RefreshTokenService(UserRepository userRepository, RefreshTokenRepository refreshTokenRepository, Environment env) {
+	public RefreshTokenServiceImpl(UserRepository userRepository, RefreshTokenRepository refreshTokenRepository, Environment env) {
 		this.userRepository = userRepository;
 		this.refreshTokenRepository = refreshTokenRepository;
 		this.env = env;

@@ -8,6 +8,7 @@ import com.mywallet.api.repository.UserRepository;
 import com.mywallet.api.repository.WalletRepository;
 import com.mywallet.api.response.format.ResponseFormat;
 import com.mywallet.api.response.transferResponse;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -17,22 +18,23 @@ import java.util.Date;
 import java.util.List;
 
 @Service
-public class WalletService {
+public class WalletServiceImpl implements WalletService{
 
-	private WalletRepository walletRepository;
+	private final WalletRepository walletRepository;
 	
-	private UserRepository userRepository;
+	private final UserRepository userRepository;
 	
-	private FireBaseService fireBaseService;
+	private final FireBaseService fireBaseService;
 
 	@Autowired
-	public WalletService(WalletRepository walletRepository, UserRepository userRepository, FireBaseService fireBaseService) {
+	public WalletServiceImpl(WalletRepository walletRepository, UserRepository userRepository, FireBaseService fireBaseService) {
 		this.walletRepository = walletRepository;
 		this.userRepository = userRepository;
 		this.fireBaseService = fireBaseService;
 	}
 
 	@Transactional
+	@Override
 	public ResponseFormat addWallet(Wallet w, String uid) {
 
 		try {
@@ -56,12 +58,14 @@ public class WalletService {
 	}
 	
 	@Transactional(readOnly = true)
+	@Override
 	public List<Wallet> getAllWallet(String UID){
 		User Existing = this.userRepository.findByUid(UID);
 		return this.walletRepository.findByUser(Existing);
 	}
 	
 	@Transactional
+	@Override
 	public ResponseFormat removeWallet(String walletId) {
 		try {
 
@@ -75,6 +79,7 @@ public class WalletService {
 	}
 	
 	@Transactional
+	@Override
 	public ResponseFormat transferInternal(TransferRequest trf, String UID) {
 		try {
 			Wallet w1 = this.walletRepository.findById(trf.getWalletIdSource()).orElse(null);
@@ -123,6 +128,7 @@ public class WalletService {
 	}
 	
 	@Transactional
+	@Override
 	public ResponseFormat cancelTransferInternal(TransferRequest trf, String UID, String period) {
 		try {
 			Wallet w1 = this.walletRepository.findById(trf.getWalletIdSource()).orElse(null);
