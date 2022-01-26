@@ -37,13 +37,13 @@ public class SwaggerConfig {
                 "My Wallet REST API",
                 "Product API to perform CRUD operations",
                 "2.0.5",
-                "Terms of service",
+                null,//"Terms of service",
                 new Contact(
                         "Mu'ti C Putro",
-                        "www.github.com/MCPutro",
+                        "https://github.com/MCPutro",
                         "em.chepe@gmail.com"),
-                "License of API",
-                "API license URL",
+                null,//"License of API",
+                null,//"API license URL",
                 Collections.emptyList()
         );
     }

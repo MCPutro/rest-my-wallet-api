@@ -26,7 +26,7 @@ public class ActivityController implements ActivityApi {
 		this.activityService = activityService;
 	}
 
-	@PutMapping("/")
+	@PostMapping("/")
 	public ResponseFormat addNewActivity(@RequestBody Activity newActivity, @RequestHeader String UID) {
 		return this.activityService.createNewActivity(newActivity, UID);
 	}
@@ -34,7 +34,6 @@ public class ActivityController implements ActivityApi {
 	@GetMapping("/")
 	public ResponseFormat getActivities(@RequestHeader String period, @RequestHeader String UID) {
 		return this.activityService.getActivities(UID, period);
-		
 	}
 	
 	@DeleteMapping("/")
@@ -42,8 +41,8 @@ public class ActivityController implements ActivityApi {
 		return this.activityService.removeActivity(UID, activityId, period);
 		
 	}
-	
-	@PostMapping("/")
+
+	@PutMapping("/")
 	public ResponseFormat updateActivity(@RequestHeader String period, @RequestHeader String UID, @RequestBody Activity newActivity) {
 		return this.activityService.updateActivity(UID, period, newActivity);
 		//return null;
