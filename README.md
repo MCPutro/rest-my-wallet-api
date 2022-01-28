@@ -12,6 +12,7 @@
   - Firebase Firestore & User create
   - Swagger (documentation tool)
   - Postman or Insomnia or Soap UI (Client Test) 
+
 ### 2. Config 
   - Rename file **firebase-key.json.example** to **firebase-key.json** in folder resources 
   - Put the firebase key in the file **firebase-key.json** then save 
