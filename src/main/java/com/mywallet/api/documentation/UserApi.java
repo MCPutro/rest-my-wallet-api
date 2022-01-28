@@ -13,19 +13,19 @@ import org.springframework.http.ResponseEntity;
 @Api
 public interface UserApi {
 
-    @ApiOperation(value = "Create than login with new account", response = ResponseEntity.class)
-    public ResponseEntity<?> createAndLogin(UserSignUpRequest user);
+    @ApiOperation(value = "Create than login with new account", response = ResponseFormat.class, nickname = "createAndLogin")
+    public ResponseFormat createAndLogin(UserSignUpRequest user);
 
-    @ApiOperation(value = "Create new account", response = ResponseFormat.class)
-    public ResponseFormat signup(UserSignUpRequest newUser);
+    @ApiOperation(value = "Sign up", response = ResponseFormat.class, nickname = "signUp")
+    public ResponseFormat signUp(UserSignUpRequest newUser);
 
-    @ApiOperation(value = "Sign in", response = ResponseFormat.class)
-    public ResponseFormat signin(UserSignInRequest user);
+    @ApiOperation(value = "Sign in", response = ResponseFormat.class, nickname = "signIn")
+    public ResponseFormat signIn(UserSignInRequest user);
 
-    @ApiOperation(value = "Refresh token", response = ResponseEntity.class)
-    public ResponseEntity<?> getTokenByRefreshToken( RefreshTokenRequest rt) ;
+    @ApiOperation(value = "Refresh token", response = ResponseFormat.class, nickname = "getTokenByRefreshToken")
+    public ResponseFormat getTokenByRefreshToken( RefreshTokenRequest rt) ;
 
-    @ApiOperation(value = "Update info user", response = ResponseFormat.class)
+    @ApiOperation(value = "Update info user", response = ResponseFormat.class, nickname = "updateUserData")
     public ResponseFormat updateUserData( UserUpdateRequest user);
 
 }

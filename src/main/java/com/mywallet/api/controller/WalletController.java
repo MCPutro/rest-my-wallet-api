@@ -31,8 +31,8 @@ public class WalletController implements WalletApi {
 	}
 
 	@PostMapping("/")
-	public ResponseFormat addWallet(@RequestBody Wallet w, @RequestHeader String UID) {
-		return this.walletService.addWallet(w, UID);
+	public ResponseFormat addWallet(@RequestBody Wallet wallet, @RequestHeader String UID) {
+		return this.walletService.addWallet(wallet, UID);
 	}
 	
 	@GetMapping("/")

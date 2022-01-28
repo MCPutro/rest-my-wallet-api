@@ -7,7 +7,7 @@ import com.mywallet.api.request.TransferRequest;
 import com.mywallet.api.repository.UserRepository;
 import com.mywallet.api.repository.WalletRepository;
 import com.mywallet.api.response.format.ResponseFormat;
-import com.mywallet.api.response.transferResponse;
+import com.mywallet.api.response.TransferResponse;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -121,7 +121,7 @@ public class WalletServiceImpl implements WalletService{
 			
 			//return new Resp("success", null, new transferResp(trf.getId(), w1.getId(), w1.getNominal(), w2.getId(), w2.getNominal(), a));
 			return ResponseFormat.builder().status(ResponseFormat.Status.success)
-					.data(new transferResponse(trf.getId(), w1.getId(), w1.getNominal(), w2.getId(), w2.getNominal(), a)).build();
+					.data(new TransferResponse(trf.getId(), w1.getId(), w1.getNominal(), w2.getId(), w2.getNominal(), a)).build();
 		} catch (Exception e) {
 			return ResponseFormat.builder().status(ResponseFormat.Status.error).message(e.getMessage()).build();//new Resp("error", null);
 		}
@@ -152,7 +152,7 @@ public class WalletServiceImpl implements WalletService{
 					;
 			//return new Resp("success", null, new transferResp(trf.getId(), w1.getId(), w1.getNominal(), w2.getId(), w2.getNominal(), null));
 			return ResponseFormat.builder().status(ResponseFormat.Status.success)
-					.data(new transferResponse(trf.getId(), w1.getId(), w1.getNominal(), w2.getId(), w2.getNominal(), null)).build();
+					.data(new TransferResponse(trf.getId(), w1.getId(), w1.getNominal(), w2.getId(), w2.getNominal(), null)).build();
 		} catch (Exception e) {
 			return ResponseFormat.builder().status(ResponseFormat.Status.error).message(e.getMessage()).build();
 		}

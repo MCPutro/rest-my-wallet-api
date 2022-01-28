@@ -2,6 +2,7 @@ package com.mywallet.api.controller;
 
 import java.util.Optional;
 
+import com.mywallet.api.response.RefreshTokenResponse;
 import com.mywallet.api.service.RefreshTokenService;
 import com.mywallet.api.service.UserService;
 import io.swagger.annotations.ApiOperation;
@@ -67,9 +68,8 @@ public class UserController implements UserApi {
 
 	@Override
 	@PostMapping(value = "/createAndLogin" , produces = "application/json")
-	public ResponseEntity<?> createAndLogin(@RequestBody UserSignUpRequest newUser) {
+	public ResponseFormat createAndLogin(@RequestBody UserSignUpRequest newUser) {
 		String temp = newUser.getPassword();
-		JsonObject resp = new JsonObject();
 		
 		ResponseFormat create = this.userService.insertUser(newUser);
 		
@@ -79,33 +79,31 @@ public class UserController implements UserApi {
 					.email(newUser.getEmail())
 					.password(temp)
 					.build();
-			
-			ResponseFormat p = this.signin(firstLogin);
-			
-			return ResponseEntity.ok(p);
+
+			return this.signIn(firstLogin);
 		}else {
-			resp.addProperty("status", create.getStatus().toString());
-			resp.addProperty("message", create.getMessage());
-			return ResponseEntity.ok(resp.toString());
+			return ResponseFormat.builder()
+					.status(create.getStatus())
+					.message(create.getMessage())
+					.build();
+
 		}
-			
-		//return null;
+
 	}
 
 	@Override
 	@PostMapping("/signup")
-	public ResponseFormat signup(@RequestBody UserSignUpRequest newUser) {
+	public ResponseFormat signUp(@RequestBody UserSignUpRequest newUser) {
 		return this.userService.insertUser(newUser);
 	}
 
 	@Override
 	@PostMapping(value = "/signin", produces = "application/json")
-	public ResponseFormat signin(@RequestBody UserSignInRequest user) {
+	public ResponseFormat signIn(@RequestBody UserSignInRequest user) {
 		try {
 			authenticate(user.getEmail(), user.getPassword());
 
-			// UserDetails userDetails =
-			// userDetailsService.loadUserByUsername(user.getEmail());
+			// UserDetails userDetails = userDetailsService.loadUserByUsername(user.getEmail());
 			UserDetailImp userDetails = userDetailsService.loadUserByEmail(user.getEmail());
 
 			String token = jwtTokenUtil.generateToken(userDetails);
@@ -126,49 +124,45 @@ public class UserController implements UserApi {
 		} catch (Exception e) {
 			return ResponseFormat.builder().status(ResponseFormat.Status.error)
 					.message(e.getMessage())
-					.build();//new Resp("error", e.getMessage());
+					.build();
 		}
 	}
 
 	@Override
 	@PostMapping(value = "/refresh-token", produces = "application/json")
-	public ResponseEntity<?> getTokenByRefreshToken(@RequestBody RefreshTokenRequest refreshToken) {
+	public ResponseFormat getTokenByRefreshToken(@RequestBody RefreshTokenRequest refreshToken) {
 		try {
 
 			Optional<com.mywallet.api.entity.RefreshToken> s = this.refreshTokenService.findByToken(refreshToken.getRefreshToken().split("\\.")[0]);
 
 			
 			if (!s.isPresent()) {
-				return ResponseEntity.ok(
-						ResponseFormat.builder().status(ResponseFormat.Status.error)
-								.message("refresh-token "+refreshToken.getRefreshToken()+" not found")
-								.build()
-				);
+				return ResponseFormat.builder().status(ResponseFormat.Status.error)
+						.message("refresh-token '"+refreshToken.getRefreshToken()+ "' is not found")
+						.build();
 			} else {
 				if (!this.refreshTokenService.isExpired(s.get())) {
 					String token = this.jwtTokenUtil.generateTokenFromEmail(s.get().getUser().getEmail());
-					
-					JsonObject resp = new JsonObject();
-					resp.addProperty("type", "Bearer");
-					resp.addProperty("token", token);
-					resp.addProperty("refreshToken", refreshToken.getRefreshToken());
 
-					String respString = "{" + "\"status\": \"success\"," + "\"message\": null," + "\"data\": " + resp.toString() + "}";
+					RefreshTokenResponse refreshTokenResponse = RefreshTokenResponse.builder()
+							.token(token)
+							.refreshToken(refreshToken.getRefreshToken())
+							.build();
 
-					return ResponseEntity.ok(respString);
+					return ResponseFormat.builder()
+							.status(ResponseFormat.Status.success)
+							.data(refreshTokenResponse)
+							.build();
 				}
 				else {
-					return ResponseEntity.ok(
-							//new Resp("error", "refresh-token "+rt.getToken()+" has expired. Please sign in")
-							ResponseFormat.builder().status(ResponseFormat.Status.error)
-									.message("refresh-token \"+rt.getToken()+\" has expired. Please sign in")
-									.build()
-					);
+					return ResponseFormat.builder().status(ResponseFormat.Status.error)
+							.message("refresh-token '"+refreshToken.getRefreshToken()+"' has expired. Please sign in")
+							.build();
 				}
 			}
 			
 		} catch (Exception e) {
-			return ResponseEntity.ok(ResponseFormat.builder().status(ResponseFormat.Status.error).message(e.getMessage()).build());
+			return ResponseFormat.builder().status(ResponseFormat.Status.error).message(e.getMessage()).build();
 		}
 	}
 

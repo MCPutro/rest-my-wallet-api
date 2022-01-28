@@ -8,12 +8,12 @@ import lombok.Setter;
 
 @Setter
 @Getter
-public class transferResponse implements Data {
+public class TransferResponse implements Data {
 	private String id;
 	private newWalletData newWalletData;
 	private Activity newActivity;
 
-	public transferResponse(String id, String walletIdSource, Double nominalSource, String walletIdDestination, Double nominalDestination, Activity newActivity) {
+	public TransferResponse(String id, String walletIdSource, Double nominalSource, String walletIdDestination, Double nominalDestination, Activity newActivity) {
 		this.id = id;
 		this.newWalletData = new newWalletData(walletIdSource, nominalSource, walletIdDestination, nominalDestination);
 		this.newActivity = newActivity;
