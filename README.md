@@ -4,15 +4,15 @@
     - Build date: 2022-01-27T15:10:21.372627500+07:00[Asia/Bangkok]
     - Documentation: https://rest-api-my-wallet.herokuapp.com/doc
 
-##Preparation
-###1. Tools
+## Preparation
+### 1. Tools
   - Spring Boot Editor (Spring Tools Suite or IntelliJ IDEA Ultimate)
   - JWT 
   - PostgreSQL 
   - Firebase Firestore & User create
   - Swagger (documentation tool)
   - Postman or Insomnia or Soap UI (Client Test) 
-###2. Config 
+### 2. Config 
   - Rename file **firebase-key.json.example** to **firebase-key.json** in folder resources 
   - Put the firebase key in the file **firebase-key.json** then save 
   - Update url, username and password database in file **application.yml**
