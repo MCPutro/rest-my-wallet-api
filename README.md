@@ -68,4 +68,4 @@ em.chepe@gmail.com
 
 
 ## Example in mobile app
-https://bit.ly/3ABO6DA
+https://drive.google.com/drive/folders/1GztRTdlSNNutVHLWUW6boz8wy_VZsexi?usp=sharing
