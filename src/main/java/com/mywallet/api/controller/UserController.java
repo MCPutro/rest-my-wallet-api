@@ -41,23 +41,9 @@ public class UserController implements UserApi {
 
 	private final UserService userService;
 
-	private final JwtTokenUtil jwtTokenUtil;
-
-	private final AuthenticationManager authenticationManager;
-
-	private final JwtUserDetailsService userDetailsService;
-
-	private final RefreshTokenService refreshTokenService;
-
 	@Autowired
-	public UserController(UserService userService, JwtTokenUtil jwtTokenUtil,
-						  AuthenticationManager authenticationManager, JwtUserDetailsService userDetailsService,
-						  RefreshTokenService refreshTokenService) {
+	public UserController(UserService userService) {
 		this.userService = userService;
-		this.jwtTokenUtil = jwtTokenUtil;
-		this.authenticationManager = authenticationManager;
-		this.userDetailsService = userDetailsService;
-		this.refreshTokenService = refreshTokenService;
 	}
 
 	@ApiOperation(value = "", hidden = true)
@@ -86,9 +72,7 @@ public class UserController implements UserApi {
 					.status(create.getStatus())
 					.message(create.getMessage())
 					.build();
-
 		}
-
 	}
 
 	@Override
@@ -100,70 +84,13 @@ public class UserController implements UserApi {
 	@Override
 	@PostMapping(value = "/signin", produces = "application/json")
 	public ResponseFormat signIn(@RequestBody UserSignInRequest user) {
-		try {
-			authenticate(user.getEmail(), user.getPassword());
-
-			// UserDetails userDetails = userDetailsService.loadUserByUsername(user.getEmail());
-			UserDetailImp userDetails = userDetailsService.loadUserByEmail(user.getEmail());
-
-			String token = jwtTokenUtil.generateToken(userDetails);
-
-			return ResponseFormat.builder().status(ResponseFormat.Status.success)
-					.data(
-							new UserSignInResponse(
-									userDetails.getUid(),
-									userDetails.getDisplayName(),
-									"Bearer",
-									token,
-									this.refreshTokenService.generateRefresToken(user),
-									userDetails.getUrlAvatar()
-							)
-					)
-					.build();
-
-		} catch (Exception e) {
-			return ResponseFormat.builder().status(ResponseFormat.Status.error)
-					.message(e.getMessage())
-					.build();
-		}
+		return this.userService.signIn(user);
 	}
 
 	@Override
 	@PostMapping(value = "/refresh-token", produces = "application/json")
 	public ResponseFormat getTokenByRefreshToken(@RequestBody RefreshTokenRequest refreshToken) {
-		try {
-
-			Optional<com.mywallet.api.entity.RefreshToken> s = this.refreshTokenService.findByToken(refreshToken.getRefreshToken().split("\\.")[0]);
-
-			
-			if (!s.isPresent()) {
-				return ResponseFormat.builder().status(ResponseFormat.Status.error)
-						.message("refresh-token '"+refreshToken.getRefreshToken()+ "' is not found")
-						.build();
-			} else {
-				if (!this.refreshTokenService.isExpired(s.get())) {
-					String token = this.jwtTokenUtil.generateTokenFromEmail(s.get().getUser().getEmail());
-
-					RefreshTokenResponse refreshTokenResponse = RefreshTokenResponse.builder()
-							.token(token)
-							.refreshToken(refreshToken.getRefreshToken())
-							.build();
-
-					return ResponseFormat.builder()
-							.status(ResponseFormat.Status.success)
-							.data(refreshTokenResponse)
-							.build();
-				}
-				else {
-					return ResponseFormat.builder().status(ResponseFormat.Status.error)
-							.message("refresh-token '"+refreshToken.getRefreshToken()+"' has expired. Please sign in")
-							.build();
-				}
-			}
-			
-		} catch (Exception e) {
-			return ResponseFormat.builder().status(ResponseFormat.Status.error).message(e.getMessage()).build();
-		}
+		return this.userService.refreshToken(refreshToken);
 	}
 
 	@Override
@@ -172,15 +99,7 @@ public class UserController implements UserApi {
 		return this.userService.updateUserData(userUpdate);
 	}
 
-	private void authenticate(String email, String password) throws Exception {
-		try {
-			authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(email, password));
-		} catch (DisabledException e) {
-			throw new Exception("USER DISABLED", e);
-		} catch (BadCredentialsException e) {
-			throw new Exception("INVALID CREDENTIALS", e);
-		}
-	}
+
 
 
 
