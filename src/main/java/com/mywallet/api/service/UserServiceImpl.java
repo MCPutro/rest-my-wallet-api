@@ -53,13 +53,13 @@ public class UserServiceImpl implements UserService{
 		this.authenticationManager = authenticationManager;
 		this.refreshTokenService = refreshTokenService;
 	}
-
+	
 	@Transactional
 	public ResponseFormat insertUser(UserSignUpRequest newUser) {
 		try {
 			ResponseFormat resp;
 			User user = this.userRepository.findByEmail(newUser.getEmail());
-			
+
 			if (user == null) {
 				user = new User(newUser.getEmail(), newUser.getPassword(), newUser.getUsername(), null, null);
 				user.setDeviceId(newUser.getDeviceId());
@@ -72,7 +72,7 @@ public class UserServiceImpl implements UserService{
 					user.setPassword(encoder.encode(user.getPassword()));
 					user.setUrlAvatar(((UserResponse) r.getData()).getUrlAvatar());
 					User result = this.userRepository.save(user);
-					
+
 					resp = ResponseFormat.builder()
 							.status(ResponseFormat.Status.success)
 							.data(new UserResponse(result.getUid(), result.getUsername(), result.getEmail(), result.getUrlAvatar() ))
