@@ -10,6 +10,12 @@ import lombok.*;
 @Builder
 public class Activity {
 
+	 public enum ActivityType{
+		INCOME,
+		EXPENSE,
+		TRANSFER
+	}
+
 	private String id;
 	private String walletId;
 	private String walletName;
@@ -18,13 +24,13 @@ public class Activity {
 	private String desc;
 	private Double nominal;
 	private Date date;
-	private boolean income;
+	private ActivityType type;
 
 	@Override
 	public String toString() {
 		return  walletId + "#" + walletName
 				+ "#" + title + "#" + desc + "#"
-				+ nominal + "#" + date + "#" + income + "#"
+				+ nominal + "#" + date + "#" + type + "#"
 				;
 	}
 	

@@ -24,13 +24,13 @@ public class WalletServiceImpl implements WalletService{
 	
 	private final UserRepository userRepository;
 	
-	private final FireBaseService fireBaseService;
+	private final ActivityService activityService;
 
 	@Autowired
-	public WalletServiceImpl(WalletRepository walletRepository, UserRepository userRepository, FireBaseService fireBaseService) {
+	public WalletServiceImpl(WalletRepository walletRepository, UserRepository userRepository, ActivityService activityService) {
 		this.walletRepository = walletRepository;
 		this.userRepository = userRepository;
-		this.fireBaseService = fireBaseService;
+		this.activityService = activityService;
 	}
 
 	@Transactional
@@ -61,7 +61,7 @@ public class WalletServiceImpl implements WalletService{
 	@Override
 	public List<Wallet> getAllWallet(String UID){
 		User Existing = this.userRepository.findByUid(UID);
-		return this.walletRepository.findByUser(Existing);
+		return this.walletRepository.findByUserOrderByNameAsc(Existing);
 	}
 	
 	@Transactional
@@ -97,12 +97,6 @@ public class WalletServiceImpl implements WalletService{
 			this.walletRepository.save(w2);
 			
 			//create record for transfer activity
-			Calendar c = Calendar.getInstance();
-			
-			c.setTime(new Date());
-			
-			String month = c.get(Calendar.MONTH)+1+"";
-			
 			Activity a = Activity.builder()
 					.id(trf.getId())
 					.walletId(w1.getId()+"##"+w2.getId())
@@ -111,14 +105,12 @@ public class WalletServiceImpl implements WalletService{
 					.category("Transfer")
 					.nominal(trf.getNominal())
 					.desc("To: "+w2.getName()+", Fee: "+trf.getFee())
-					.date(new Date())
-					.income(false)
+					.date(trf.getDate())
+					.type(Activity.ActivityType.TRANSFER)//.income(false)
 					.build();
-			
-			String err = this.fireBaseService.insertActivity(UID, 
-					c.get(Calendar.YEAR) + "-" + ((month.length() == 1) ? ("0"+month) : month), 
-					a);
-			
+
+			ResponseFormat activity = this.activityService.createNewActivity(a, UID);
+
 			//return new Resp("success", null, new transferResp(trf.getId(), w1.getId(), w1.getNominal(), w2.getId(), w2.getNominal(), a));
 			return ResponseFormat.builder().status(ResponseFormat.Status.success)
 					.data(new TransferResponse(trf.getId(), w1.getId(), w1.getNominal(), w2.getId(), w2.getNominal(), a)).build();
@@ -146,10 +138,12 @@ public class WalletServiceImpl implements WalletService{
 			this.walletRepository.save(w2);
 			
 			//remove record for transfer activity
-			this.fireBaseService.getActivityCollectionReference(UID, period)
-					.document(trf.getId())
-					.delete()
-					;
+//			this.fireBaseService.getActivityCollectionReference(UID, period)
+//					.document(trf.getId())
+//					.delete()
+//					;
+			this.activityService.removeActivity(UID, trf.getId(),period);
+
 			//return new Resp("success", null, new transferResp(trf.getId(), w1.getId(), w1.getNominal(), w2.getId(), w2.getNominal(), null));
 			return ResponseFormat.builder().status(ResponseFormat.Status.success)
 					.data(new TransferResponse(trf.getId(), w1.getId(), w1.getNominal(), w2.getId(), w2.getNominal(), null)).build();

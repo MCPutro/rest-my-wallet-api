@@ -36,7 +36,7 @@ public class SwaggerConfig {
         return new ApiInfo(
                 "My Wallet REST API",
                 "Product API to perform CRUD operations",
-                "2.0.7",
+                "2.1.0",
                 null,//"Terms of service",
                 new Contact(
                         "Mu'ti C Putro",

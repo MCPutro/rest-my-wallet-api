@@ -8,6 +8,7 @@ import com.mywallet.api.entity.Wallet;
 import com.mywallet.api.model.Activity;
 import com.mywallet.api.model.ActivityList;
 import com.mywallet.api.repository.WalletRepository;
+import com.mywallet.api.response.ActivityCreateResponse;
 import com.mywallet.api.response.ActivityUpdateResponse;
 import com.mywallet.api.response.format.Data;
 import com.mywallet.api.response.format.ResponseFormat;
@@ -38,69 +39,79 @@ public class ActivityServiceImpl implements ActivityService{
 	@Override
 	public ResponseFormat createNewActivity(Activity newActivity, String UID) {
 		try {
+			if (newActivity.getId() == null) newActivity.setId(UUID.randomUUID().toString());
 
-			if (newActivity.getId() == null) {
-				newActivity.setId(UUID.randomUUID().toString());
-			}
-			ResponseFormat resp;
-			Optional<Wallet> existingWallet = this.walletRepository.findById(newActivity.getWalletId());
-			//System.out.println(existingWallet.get());
-			if (existingWallet.isPresent()) {
+			//ResponseFormat resp;
+			Calendar c = Calendar.getInstance();
+			c.setTime(newActivity.getDate());
+			String month = c.get(Calendar.MONTH)+1+"";
 
-				// check if the balance is sufficient **/
-				double walletNominal = existingWallet.get().getNominal();
-				double balance;
-				if (!newActivity.isIncome()) {
-					balance = walletNominal - newActivity.getNominal();
-				}else {
-					balance = walletNominal + newActivity.getNominal();
-				}
+			if (newActivity.getType() != Activity.ActivityType.TRANSFER){
 
-				if (balance >= 0) {
-					// update nominal wallet **/
-					existingWallet.get().setNominal(balance);
+				Optional<Wallet> existingWallet = this.walletRepository.findById(newActivity.getWalletId());
+				//System.out.println(existingWallet.get());
+				if (existingWallet.isPresent()) {
 
-					//update balance to db
-					walletRepository.save(existingWallet.get());
-
-					Calendar c = Calendar.getInstance();
-
-					c.setTime(newActivity.getDate());
-
-					String month = c.get(Calendar.MONTH)+1+"";
-
-					String err = this.fireBaseService.insertActivity(UID,
-							c.get(Calendar.YEAR) + "-" + ((month.length() == 1) ? ("0"+month) : month),
-							newActivity);
-
-					if (err == null) {
-						resp = ResponseFormat.builder()
-								.status(ResponseFormat.Status.success)
-								.data(new Data() {
-									public final String activityId = newActivity.getId();
-									public final String walletId = existingWallet.get().getId();
-									public final Double remainingBalance = balance;
-								})
-								.build();
-
-					} else {
-						resp = ResponseFormat.builder().status(ResponseFormat.Status.error).message(err).build();
+					// calculate balance **/
+					double walletNominal = existingWallet.get().getNominal();
+					double balance = newActivity.getNominal();
+					if (newActivity.getType() == Activity.ActivityType.EXPENSE){
+						balance = walletNominal - newActivity.getNominal();
+					} else if (newActivity.getType() == Activity.ActivityType.INCOME){
+						balance = walletNominal + newActivity.getNominal();
 					}
 
-				} else {
-					resp = ResponseFormat.builder().status(ResponseFormat.Status.error).message("not enough balance").build();
-				}
-				System.out.println("end : " + LocalDateTime.now());
-			} else {
-				resp = ResponseFormat.builder().status(ResponseFormat.Status.error).message("wallet id " + newActivity.getWalletId() + " doesn't exists").build();
-			}
+					// check if the balance is sufficient **/
+					if (balance >= 0) {
+						// update nominal wallet **/
+						existingWallet.get().setNominal(balance);
 
-			return resp;
+						//update balance to db
+						walletRepository.save(existingWallet.get());
+
+						//insert new activity to firestore
+						String err = push2firestore(UID, month, c, newActivity);
+
+						if (err == null) {
+							return ResponseFormat.builder()
+									.status(ResponseFormat.Status.success)
+									.data(new ActivityCreateResponse(newActivity.getId(), existingWallet.get().getId(), balance))
+									.build();
+						} else {
+							return ResponseFormat.builder().status(ResponseFormat.Status.error).message(err).build();
+						}
+
+					} else {
+						return ResponseFormat.builder().status(ResponseFormat.Status.error).message("not enough balance").build();
+					}
+					//System.out.println("end : " + LocalDateTime.now());
+				} else {
+					return ResponseFormat.builder().status(ResponseFormat.Status.error).message("wallet id " + newActivity.getWalletId() + " doesn't exists").build();
+				}
+			} else {
+				// transfer type
+				//insert new activity to firestore
+				String err = push2firestore(UID, month, c, newActivity);
+				if (err == null) {
+					return ResponseFormat.builder()
+							.status(ResponseFormat.Status.success)
+							.build();
+				}else{
+					return ResponseFormat.builder().status(ResponseFormat.Status.error).message(err).build();
+				}
+			}
 		} catch (Throwable e) {
 			System.out.println(
 					"ActivityService|createNewActivity|error|" + LocalDateTime.now() + "|" + e.getMessage()+"|"+new Gson().toJson(newActivity));
 			return ResponseFormat.builder().status(ResponseFormat.Status.error).message(e.getMessage()).build();
 		}
+	}
+
+	private String push2firestore(String UID, String month, Calendar c, Activity newActivity){
+		return this.fireBaseService.insertActivity(UID,
+				c.get(Calendar.YEAR) + "-" + ((month.length() == 1) ? ("0"+month) : month),
+				newActivity);
+
 	}
 
 	@Transactional(readOnly = true)
@@ -118,18 +129,18 @@ public class ActivityServiceImpl implements ActivityService{
 
 			ArrayList<Activity> tmp = new ArrayList<>();
 
-			for (DocumentSnapshot document : querySnapshot.get().getDocuments()) {
+			for (DocumentSnapshot doc : querySnapshot.get().getDocuments()) {
 
 				tmp.add(Activity.builder()
-						.id(document.getString("id"))
-						.walletId(document.getString("walletId"))
-						.walletName(document.getString("walletName"))
-						.title(document.getString("title"))
-						.category(document.getString("category"))
-						.nominal(document.getDouble("nominal"))
-						.date(document.getDate("date"))
-						.income(document.getBoolean("income"))
-						.desc(document.getString("desc"))
+						.id(doc.getString("id"))
+						.walletId(doc.getString("walletId"))
+						.walletName(doc.getString("walletName"))
+						.title(doc.getString("title"))
+						.category(doc.getString("category"))
+						.nominal(doc.getDouble("nominal"))
+						.date(doc.getDate("date"))
+						.type(Activity.ActivityType.valueOf(doc.getString("type")))//.income(doc.getBoolean("income"))
+						.desc(doc.getString("desc"))
 						.build()
 					);
 			}
@@ -161,29 +172,32 @@ public class ActivityServiceImpl implements ActivityService{
 					;
 
 			if (writeResult.get().get().getString("walletId") != null) {
-				/**update nominal wallet**/
-				Wallet existingWallet = this.walletRepository.findById(writeResult.get().get().getString("walletId")).orElse(null);
-				if (existingWallet != null) {
-					if (writeResult.get().get().getBoolean("income")) {
-						existingWallet.setNominal(existingWallet.getNominal() - writeResult.get().get().getDouble("nominal"));
-					}else {
-						existingWallet.setNominal(existingWallet.getNominal() + writeResult.get().get().getDouble("nominal"));
-					}
+				ResponseFormat resp = ResponseFormat.builder().status(ResponseFormat.Status.success).build();
+				boolean isTransfer = Activity.ActivityType.valueOf(writeResult.get().get().getString("type")) == Activity.ActivityType.TRANSFER;
 
-					this.walletRepository.save(existingWallet);
+				if (!isTransfer) {
+					// update nominal wallet
+					Wallet existingWallet = this.walletRepository.findById(writeResult.get().get().getString("walletId")).orElse(null);
+					if (existingWallet != null) {
+						if(Activity.ActivityType.valueOf(writeResult.get().get().getString("type")) == Activity.ActivityType.INCOME){//if (writeResult.get().get().getBoolean("income")) {
+							existingWallet.setNominal(existingWallet.getNominal() - writeResult.get().get().getDouble("nominal"));
+						}else {
+							existingWallet.setNominal(existingWallet.getNominal() + writeResult.get().get().getDouble("nominal"));
+						}
+						this.walletRepository.save(existingWallet);
+						resp = ResponseFormat.builder()
+								.status(ResponseFormat.Status.success)
+								.data(new Data() {
+									public final String walletid = existingWallet.getId();
+									public final Double remainingBalance = existingWallet.getNominal();
+								})
+								.build();
+					}
 				}
 
-				//System.out.println("nominal : " + writeResult.get().get().getDouble("nominalActivity"));
 				writeResult.delete();
-
-				return ResponseFormat.builder()
-						.status(ResponseFormat.Status.success)
-						.data(new Data() {
-							public final String walletid = existingWallet.getId();
-							public final Double remainingBalance = existingWallet.getNominal();
-						})
-						.build();
-			}else {
+				return resp;
+			} else {
 				return ResponseFormat.builder().status(ResponseFormat.Status.error).message("data not found.").build();
 			}
 
@@ -195,66 +209,66 @@ public class ActivityServiceImpl implements ActivityService{
 	@Transactional
 	@Override
 	public ResponseFormat updateActivity(String UID, String period, Activity activity) {
-
-		try {
-			//get prev wallet
-			Wallet prevWallet = this.walletRepository.findById(activity.getWalletId()).orElse(null);
-			if (prevWallet != null) {
-				//get prev activity
-				ApiFuture<DocumentSnapshot> doc = this.fireBaseService.getActivityCollectionReference(UID, period).document(activity.getId()).get();
-
-				if (doc.get().getString("id") == null) {
-					return ResponseFormat.builder().status(ResponseFormat.Status.error).message("Activity not found").build();
-				}
-
-				Activity prevActivity = Activity.builder()
-						.id(doc.get().getString("id"))
-						.walletId(doc.get().getString("walletId"))
-						.walletName(doc.get().getString("walletName"))
-						.title(doc.get().getString("title"))
-						.category(doc.get().getString("category"))
-						.nominal(doc.get().getDouble("nominal"))
-						.date(doc.get().getDate("date"))
-						.income(doc.get().getBoolean("income"))
-						.build();
-
-				//update nominal if its change
-				if (activity.getNominal() != prevActivity.getNominal()) {
-					if (prevActivity.isIncome()) {
-						prevWallet.setNominal(prevWallet.getNominal() - prevActivity.getNominal());
-
-						prevWallet.setNominal(prevWallet.getNominal() + activity.getNominal());
-					}else {
-						prevWallet.setNominal(prevWallet.getNominal() + prevActivity.getNominal());
-
-						prevWallet.setNominal(prevWallet.getNominal() - activity.getNominal());
-					}
-				}
-
-
-				String err = this.fireBaseService.insertActivity(UID, period, activity);
-
-				if (err == null) {
-					if (activity.getNominal() != prevActivity.getNominal()) {
-						this.walletRepository.save(prevWallet);
-					}
-					System.out.println("ok "+activity.getDate());
-					return ResponseFormat.builder()
-							.status(ResponseFormat.Status.success)
-							.data(new ActivityUpdateResponse(prevWallet, activity))
-							.build();
-				}else {
-					return ResponseFormat.builder().status(ResponseFormat.Status.error).message(err).build();
-				}
-			}
-
+//
+//		try {
+//			//get prev wallet
+//			Wallet prevWallet = this.walletRepository.findById(activity.getWalletId()).orElse(null);
+//			if (prevWallet != null) {
+//				//get prev activity
+//				ApiFuture<DocumentSnapshot> doc = this.fireBaseService.getActivityCollectionReference(UID, period).document(activity.getId()).get();
+//
+//				if (doc.get().getString("id") == null) {
+//					return ResponseFormat.builder().status(ResponseFormat.Status.error).message("Activity not found").build();
+//				}
+//
+//				Activity prevActivity = Activity.builder()
+//						.id(doc.get().getString("id"))
+//						.walletId(doc.get().getString("walletId"))
+//						.walletName(doc.get().getString("walletName"))
+//						.title(doc.get().getString("title"))
+//						.category(doc.get().getString("category"))
+//						.nominal(doc.get().getDouble("nominal"))
+//						.date(doc.get().getDate("date"))
+//						.type(doc.get().getString())//.income(doc.get().getBoolean("income"))
+//						.build();
+//
+//				//update nominal if its change
+//				if (activity.getNominal() != prevActivity.getNominal()) {
+//					if (prevActivity.isIncome()) {
+//						prevWallet.setNominal(prevWallet.getNominal() - prevActivity.getNominal());
+//
+//						prevWallet.setNominal(prevWallet.getNominal() + activity.getNominal());
+//					}else {
+//						prevWallet.setNominal(prevWallet.getNominal() + prevActivity.getNominal());
+//
+//						prevWallet.setNominal(prevWallet.getNominal() - activity.getNominal());
+//					}
+//				}
+//
+//
+//				String err = this.fireBaseService.insertActivity(UID, period, activity);
+//
+//				if (err == null) {
+//					if (activity.getNominal() != prevActivity.getNominal()) {
+//						this.walletRepository.save(prevWallet);
+//					}
+//					System.out.println("ok "+activity.getDate());
+//					return ResponseFormat.builder()
+//							.status(ResponseFormat.Status.success)
+//							.data(new ActivityUpdateResponse(prevWallet, activity))
+//							.build();
+//				}else {
+//					return ResponseFormat.builder().status(ResponseFormat.Status.error).message(err).build();
+//				}
+//			}
+//
 			return ResponseFormat.builder().status(ResponseFormat.Status.error).message("Internal Server Error").build();
-
-
-		} catch (Exception e) {
-			return ResponseFormat.builder().status(ResponseFormat.Status.error).message(e.getMessage()).build();
-		}
-
-
+//
+//
+//		} catch (Exception e) {
+//			return ResponseFormat.builder().status(ResponseFormat.Status.error).message(e.getMessage()).build();
+//		}
+//
+//
 	}
 }
