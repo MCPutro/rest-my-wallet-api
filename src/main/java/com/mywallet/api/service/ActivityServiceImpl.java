@@ -118,19 +118,20 @@ public class ActivityServiceImpl implements ActivityService{
 	@Override
 	public ResponseFormat getActivities(String UID, String period) {
 		try {
+			int i = 1;
 			ResponseFormat resp;
 			CollectionReference cities = this.fireBaseService.getActivityCollectionReference(UID, period);
 			Query query = cities
 					.orderBy("date", Direction.DESCENDING)
 					//.limit(30)
 					;
-
+			System.out.println(i++ + "---------------");
 			ApiFuture<QuerySnapshot> querySnapshot = query.get();
-
+			System.out.println(i++ + "---------------");
 			ArrayList<Activity> tmp = new ArrayList<>();
-
+			System.out.println(i++ + "---------------");
 			for (DocumentSnapshot doc : querySnapshot.get().getDocuments()) {
-
+				System.out.println(i++ + "---------------add");
 				tmp.add(Activity.builder()
 						.id(doc.getString("id"))
 						.walletId(doc.getString("walletId"))
@@ -144,13 +145,13 @@ public class ActivityServiceImpl implements ActivityService{
 						.build()
 					);
 			}
-
+			System.out.println(i++ + "---------------");
 
 			resp = ResponseFormat.builder()
 					.status(ResponseFormat.Status.success)
 					.data(ActivityList.builder().period(period).activities(tmp).build())
 					.build();
-
+			System.out.println(i++ + "---------------");
 			return resp;
 		} catch (Exception e) {
 			return ResponseFormat.builder()
