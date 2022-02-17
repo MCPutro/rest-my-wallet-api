@@ -118,20 +118,19 @@ public class ActivityServiceImpl implements ActivityService{
 	@Override
 	public ResponseFormat getActivities(String UID, String period) {
 		try {
-			int i = 1;
 			ResponseFormat resp;
 			CollectionReference cities = this.fireBaseService.getActivityCollectionReference(UID, period);
 			Query query = cities
 					.orderBy("date", Direction.DESCENDING)
 					//.limit(30)
 					;
-			System.out.println(i++ + "---------------");
+
 			ApiFuture<QuerySnapshot> querySnapshot = query.get();
-			System.out.println(i++ + "---------------");
+
 			ArrayList<Activity> tmp = new ArrayList<>();
-			System.out.println(i++ + "---------------");
+
 			for (DocumentSnapshot doc : querySnapshot.get().getDocuments()) {
-				System.out.println(i++ + "---------------add");
+
 				tmp.add(Activity.builder()
 						.id(doc.getString("id"))
 						.walletId(doc.getString("walletId"))
@@ -145,13 +144,13 @@ public class ActivityServiceImpl implements ActivityService{
 						.build()
 					);
 			}
-			System.out.println(i++ + "---------------");
+
 
 			resp = ResponseFormat.builder()
 					.status(ResponseFormat.Status.success)
 					.data(ActivityList.builder().period(period).activities(tmp).build())
 					.build();
-			System.out.println(i++ + "---------------");
+
 			return resp;
 		} catch (Exception e) {
 			return ResponseFormat.builder()
@@ -210,66 +209,66 @@ public class ActivityServiceImpl implements ActivityService{
 	@Transactional
 	@Override
 	public ResponseFormat updateActivity(String UID, String period, Activity activity) {
-//
-//		try {
-//			//get prev wallet
-//			Wallet prevWallet = this.walletRepository.findById(activity.getWalletId()).orElse(null);
-//			if (prevWallet != null) {
-//				//get prev activity
-//				ApiFuture<DocumentSnapshot> doc = this.fireBaseService.getActivityCollectionReference(UID, period).document(activity.getId()).get();
-//
-//				if (doc.get().getString("id") == null) {
-//					return ResponseFormat.builder().status(ResponseFormat.Status.error).message("Activity not found").build();
-//				}
-//
-//				Activity prevActivity = Activity.builder()
-//						.id(doc.get().getString("id"))
-//						.walletId(doc.get().getString("walletId"))
-//						.walletName(doc.get().getString("walletName"))
-//						.title(doc.get().getString("title"))
-//						.category(doc.get().getString("category"))
-//						.nominal(doc.get().getDouble("nominal"))
-//						.date(doc.get().getDate("date"))
-//						.type(doc.get().getString())//.income(doc.get().getBoolean("income"))
-//						.build();
-//
-//				//update nominal if its change
-//				if (activity.getNominal() != prevActivity.getNominal()) {
-//					if (prevActivity.isIncome()) {
-//						prevWallet.setNominal(prevWallet.getNominal() - prevActivity.getNominal());
-//
-//						prevWallet.setNominal(prevWallet.getNominal() + activity.getNominal());
-//					}else {
-//						prevWallet.setNominal(prevWallet.getNominal() + prevActivity.getNominal());
-//
-//						prevWallet.setNominal(prevWallet.getNominal() - activity.getNominal());
-//					}
-//				}
-//
-//
-//				String err = this.fireBaseService.insertActivity(UID, period, activity);
-//
-//				if (err == null) {
-//					if (activity.getNominal() != prevActivity.getNominal()) {
-//						this.walletRepository.save(prevWallet);
-//					}
-//					System.out.println("ok "+activity.getDate());
-//					return ResponseFormat.builder()
-//							.status(ResponseFormat.Status.success)
-//							.data(new ActivityUpdateResponse(prevWallet, activity))
-//							.build();
-//				}else {
-//					return ResponseFormat.builder().status(ResponseFormat.Status.error).message(err).build();
-//				}
-//			}
-//
+
+		try {
+			//get prev wallet
+			Wallet prevWallet = this.walletRepository.findById(activity.getWalletId()).orElse(null);
+			if (prevWallet != null) {
+				//get prev activity
+				ApiFuture<DocumentSnapshot> doc = this.fireBaseService.getActivityCollectionReference(UID, period).document(activity.getId()).get();
+
+				if (doc.get().getString("id") == null) {
+					return ResponseFormat.builder().status(ResponseFormat.Status.error).message("Activity not found").build();
+				}
+
+				Activity prevActivity = Activity.builder()
+						.id(doc.get().getString("id"))
+						.walletId(doc.get().getString("walletId"))
+						.walletName(doc.get().getString("walletName"))
+						.title(doc.get().getString("title"))
+						.category(doc.get().getString("category"))
+						.nominal(doc.get().getDouble("nominal"))
+						.date(doc.get().getDate("date"))
+						.type(Activity.ActivityType.valueOf(doc.get().getString("type")))//.income(doc.get().getBoolean("income"))
+						.build();
+
+				//update nominal if its change
+				if (activity.getNominal() != prevActivity.getNominal()) {
+					if (prevActivity.getType() == Activity.ActivityType.INCOME){//if (prevActivity.isIncome()) {
+						prevWallet.setNominal(prevWallet.getNominal() - prevActivity.getNominal());
+
+						prevWallet.setNominal(prevWallet.getNominal() + activity.getNominal());
+					}else {
+						prevWallet.setNominal(prevWallet.getNominal() + prevActivity.getNominal());
+
+						prevWallet.setNominal(prevWallet.getNominal() - activity.getNominal());
+					}
+				}
+
+
+				String err = this.fireBaseService.insertActivity(UID, period, activity);
+
+				if (err == null) {
+					if (activity.getNominal() != prevActivity.getNominal()) {
+						this.walletRepository.save(prevWallet);
+					}
+					System.out.println("ok "+activity.getDate());
+					return ResponseFormat.builder()
+							.status(ResponseFormat.Status.success)
+							.data(new ActivityUpdateResponse(prevWallet, activity))
+							.build();
+				}else {
+					return ResponseFormat.builder().status(ResponseFormat.Status.error).message(err).build();
+				}
+			}
+
 			return ResponseFormat.builder().status(ResponseFormat.Status.error).message("Internal Server Error").build();
-//
-//
-//		} catch (Exception e) {
-//			return ResponseFormat.builder().status(ResponseFormat.Status.error).message(e.getMessage()).build();
-//		}
-//
-//
+
+
+		} catch (Exception e) {
+			return ResponseFormat.builder().status(ResponseFormat.Status.error).message(e.getMessage()).build();
+		}
+
+
 	}
 }
